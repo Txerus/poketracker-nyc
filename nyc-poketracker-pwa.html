@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>NYC PokeTracker</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PokeTracker NYC">
+<meta name="theme-color" content="#0a0c10">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>:root{--bg:#0a0c10;--panel:#10131a;--card:#161c28;--border:#1e2a3a;--accent:#00e5ff;--red:#ff4081;--green:#69ff47;--gold:#ffd740;--text:#c8d8f0;--muted:#4a6080;--safe:env(safe-area-inset-bottom,0px);--top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;overflow:hidden;position:fixed;width:100%}
+#app{display:flex;flex-direction:column;height:100%;padding-top:var(--top)}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;background:rgba(10,12,16,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);z-index:200;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:8px}
+.app-title{font-size:20px;font-weight:700;color:white;letter-spacing:-.5px}
+.live-badge{display:flex;align-items:center;gap:4px;padding:2px 7px;background:rgba(105,255,71,.12);border:1px solid rgba(105,255,71,.3);border-radius:20px;font-size:10px;font-weight:600;color:var(--green);letter-spacing:1px}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 4px var(--green)}50%{opacity:.3;box-shadow:none}}
+.topbar-right{display:flex;gap:8px}
+.icon-btn{width:36px;height:36px;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all .15s;position:relative}
+.icon-btn:active{transform:scale(.93)}
+.notif-count{position:absolute;top:-4px;right:-4px;background:var(--red);color:white;font-size:9px;font-weight:700;width:14px;height:14px;border-radius:50%;display:none;align-items:center;justify-content:center}
+#main{flex:1;position:relative;overflow:hidden}
+#map{position:absolute;inset:0;z-index:1}
+.poke-pin{background:rgba(16,19,26,.9);border:2px solid var(--accent);border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(0,229,255,.35),0 3px 10px rgba(0,0,0,.6);overflow:hidden}
+.poke-pin img{width:36px;height:36px;object-fit:contain}
+.poke-pin.hundo{border-color:var(--gold);box-shadow:0 0 16px rgba(255,215,64,.5)}
+.poke-pin.watched{border-color:var(--red);box-shadow:0 0 16px rgba(255,64,129,.5)}
+.poke-pin.rare{border-color:#a855f7;box-shadow:0 0 16px rgba(168,85,247,.5)}
+#map-controls{position:absolute;top:12px;right:12px;z-index:100;display:flex;flex-direction:column;gap:6px}
+.map-ctrl{width:40px;height:40px;background:rgba(16,19,26,.92);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.map-ctrl:active{transform:scale(.92)}
+#spawn-chip{position:absolute;top:12px;left:12px;z-index:100;background:rgba(16,19,26,.92);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+#spawn-chip .cnt{color:var(--accent);font-size:14px;font-weight:700}
+#mode-chip{position:absolute;top:48px;left:12px;z-index:100;background:rgba(16,19,26,.92);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:10px;color:var(--muted);letter-spacing:1px;max-width:calc(100vw - 80px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vis-chip{position:absolute;top:80px;left:12px;z-index:100;background:rgba(16,19,26,.85);border:1px solid var(--border);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--muted)}
+#poke-popup{position:absolute;bottom:110px;left:50%;transform:translateX(-50%);z-index:200;width:calc(100vw - 32px);max-width:360px;background:rgba(16,19,26,.97);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:0 8px 40px rgba(0,0,0,.7);display:none;animation:popIn .25s cubic-bezier(.32,1,.41,1)}
+@keyframes popIn{from{transform:translateX(-50%) scale(.92);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
+.popup-close{position:absolute;top:12px;right:12px;width:28px;height:28px;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--muted)}
+.popup-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.popup-img{width:64px;height:64px;object-fit:contain}
+.popup-name{font-size:22px;font-weight:700;color:white}
+.popup-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.popup-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px}
+.pstat{background:var(--bg);border-radius:10px;padding:8px;text-align:center}
+.pstat-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.pstat-v{font-size:18px;font-weight:700;color:var(--accent)}
+.popup-coords{background:var(--bg);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer}
+.coords-txt{font-family:'Courier New',monospace;font-size:12px;color:var(--green)}
+.copy-btn{font-size:11px;color:var(--muted);background:var(--card);padding:3px 8px;border-radius:6px}
+.popup-btns{display:flex;gap:8px}
+.pbtn{flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);text-align:center;text-decoration:none;font-size:13px;font-weight:600;cursor:pointer;display:block}
+.pbtn:active{transform:scale(.96)}
+.pbtn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+#bottom-sheet{position:absolute;bottom:0;left:0;right:0;z-index:150;background:rgba(10,12,16,.97);border-top:1px solid var(--border);border-radius:20px 20px 0 0;transform:translateY(calc(100% - 100px));transition:transform .35s cubic-bezier(.32,1,.41,1);padding-bottom:var(--safe);max-height:80vh}
+#bottom-sheet.expanded{transform:translateY(0)}
+.sheet-handle-area{padding:12px 0 6px;display:flex;justify-content:center;cursor:pointer}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px}
+.sheet-header{padding:4px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.sheet-title{font-size:16px;font-weight:700;color:white}
+.sheet-cnt{font-size:12px;color:var(--muted);background:var(--card);padding:2px 8px;border-radius:20px}
+#filter-bar{padding:0 12px 10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+#filter-bar::-webkit-scrollbar{display:none}
+.fpill{flex-shrink:0;padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.fpill.active{background:rgba(0,229,255,.12);border-color:var(--accent);color:var(--accent)}
+#search-row{padding:0 12px 10px;position:relative}
+#search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px 9px 36px;color:var(--text);font-size:14px;outline:none;-webkit-appearance:none}
+#search-input:focus{border-color:var(--accent)}
+.search-icon{position:absolute;left:24px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+#spawn-list{overflow-y:auto;max-height:calc(80vh - 200px);padding:0 12px 16px;-webkit-overflow-scrolling:touch}
+#spawn-list::-webkit-scrollbar{display:none}
+.sitem{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:6px;cursor:pointer}
+.sitem:active{transform:scale(.98)}
+.sitem.hundo{border-color:rgba(255,215,64,.4)}
+.sitem.watched{border-color:rgba(255,64,129,.4)}
+.sitem-img{width:46px;height:46px;object-fit:contain;flex-shrink:0}
+.sitem-body{flex:1;min-width:0}
+.sitem-name{font-size:15px;font-weight:700;color:white;display:flex;align-items:center;gap:6px}
+.iv-tag{font-size:10px;padding:1px 5px;border-radius:5px;font-weight:600;font-family:'Courier New',monospace}
+.iv-100{background:rgba(255,215,64,.2);color:var(--gold)}
+.iv-90{background:rgba(105,255,71,.15);color:var(--green)}
+.iv-80{background:rgba(0,229,255,.15);color:var(--accent)}
+.iv-low{background:rgba(255,64,129,.12);color:var(--red)}
+.sitem-sub{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stimer{font-size:13px;font-weight:700;font-family:'Courier New',monospace;color:var(--accent);flex-shrink:0}
+.stimer.urgent{color:var(--red);animation:blink .6s step-end infinite}
+@keyframes blink{50%{opacity:.2}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:flex-end;justify-content:center;padding-bottom:var(--safe)}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:var(--panel);border-radius:20px 20px 0 0;border:1px solid var(--border);border-bottom:none;width:100%;max-height:80vh;padding:16px;animation:slideUp .3s cubic-bezier(.32,1,.41,1);overflow-y:auto}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-size:18px;font-weight:700;color:white;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{width:28px;height:28px;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--muted)}
+.watch-input-row{display:flex;gap:8px;margin-bottom:14px}
+.watch-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-size:15px;outline:none;-webkit-appearance:none}
+.watch-input:focus{border-color:var(--red)}
+.btn-add{padding:10px 18px;background:var(--red);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+.watch-row{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:10px 14px;margin-bottom:6px}
+.watch-row-img{width:32px;height:32px;object-fit:contain}
+.watch-row-name{flex:1;font-size:15px;font-weight:600;color:white}
+.watch-row-del{width:24px;height:24px;background:rgba(255,64,129,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--red);font-size:16px}
+.ntf-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:14px;cursor:pointer}
+.ntf-label{font-size:14px;font-weight:600;color:white}
+.ntf-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.toggle-track{width:44px;height:26px;background:var(--border);border-radius:13px;position:relative;flex-shrink:0}
+.toggle-track.on{background:var(--accent)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;transition:transform .2s}
+.toggle-track.on .toggle-thumb{transform:translateX(18px)}
+.fsec{margin-bottom:16px}
+.fsec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.slider-row{display:flex;align-items:center;gap:10px}
+.slider-row input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer}
+.slider-val{font-size:14px;font-weight:700;color:var(--accent);font-family:'Courier New',monospace;min-width:42px;text-align:right}
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.type-btn{padding:6px 4px;border-radius:8px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1px solid transparent;text-transform:capitalize}
+.type-btn.active{border-color:white}
+#toast-wrap{position:fixed;top:calc(var(--top) + 70px);left:0;right:0;z-index:1000;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding:0 12px}
+.toast{background:rgba(22,28,40,.97);border:1px solid var(--red);border-radius:16px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,.5);animation:toastIn .3s cubic-bezier(.32,1,.41,1);pointer-events:all;width:100%;max-width:360px;cursor:pointer}
+@keyframes toastIn{from{transform:translateY(-20px) scale(.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.toast-img{width:40px;height:40px;object-fit:contain;flex-shrink:0}
+.toast-body{flex:1}
+.toast-name{font-size:14px;font-weight:700}
+.toast-detail{font-size:12px;color:var(--muted);margin-top:1px}
+#install-banner{position:fixed;bottom:0;left:0;right:0;z-index:600;background:var(--card);border-top:1px solid var(--border);padding:14px 16px calc(14px + var(--safe));display:none;align-items:center;gap:12px}
+#install-banner.show{display:flex}
+.install-body{flex:1}
+.install-title{font-size:14px;font-weight:700;color:white}
+.install-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.install-close{font-size:20px;color:var(--muted);padding:4px;cursor:pointer}
+.empty{text-align:center;padding:24px 16px;color:var(--muted)}
+.empty-icon{font-size:32px;margin-bottom:8px}
+.leaflet-control-attribution,.leaflet-control-zoom{display:none}</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="topbar-left">
+      <div class="app-title">&#128507; PokeTracker NYC</div>
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" onclick="openWatch()">&#128276;<div class="notif-count" id="watch-cnt">0</div></div>
+      <div class="icon-btn" onclick="openSettings()">&#9881;&#65039;</div>
+      <div class="icon-btn" onclick="refresh()">&#8635;</div>
+    </div>
+  </div>
+  <div id="main">
+    <div id="map"></div>
+    <div id="spawn-chip"><span>&#127919;</span><span class="cnt" id="cnt">0</span><span>spawns</span></div>
+    <div id="mode-chip">CONNECTING...</div>
+    <div id="vis-chip">...</div>
+    <div id="map-controls">
+      <div class="map-ctrl" onclick="centerNYC()">&#129505;</div>
+      <div class="map-ctrl" onclick="map.zoomIn()">+</div>
+      <div class="map-ctrl" onclick="map.zoomOut()">&#8722;</div>
+    </div>
+    <div id="poke-popup" style="display:none">
+      <div class="popup-close" onclick="closePopup()">&#10005;</div>
+      <div id="popup-content"></div>
+    </div>
+  </div>
+  <div id="bottom-sheet">
+    <div class="sheet-handle-area" onclick="toggleSheet()"><div class="sheet-handle"></div></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Spawns NYC</div>
+      <div class="sheet-cnt" id="sheet-cnt">0</div>
+    </div>
+    <div id="filter-bar">
+      <div class="fpill active" onclick="setQF(this,'all')">Tous</div>
+      <div class="fpill" onclick="setQF(this,'hundo')">&#10024; 100% IV</div>
+      <div class="fpill" onclick="setQF(this,'rare')">&#11088; Rares</div>
+      <div class="fpill" onclick="setQF(this,'watched')">&#128276; Alertes</div>
+      <div class="fpill" onclick="setQF(this,'90')">&#128142; 90%+</div>
+      <div class="fpill" onclick="setQF(this,'expiring')">&#9200; &lt;5min</div>
+    </div>
+    <div id="search-row">
+      <div class="search-icon">&#128269;</div>
+      <input id="search-input" type="search" placeholder="Chercher un Pokemon..." oninput="applyFilters()" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div id="spawn-list"><div class="empty"><div class="empty-icon">&#8635;</div><div class="empty-text">Chargement...</div></div></div>
+  </div>
+</div>
+<div id="toast-wrap"></div>
+<div class="modal-overlay" id="watch-modal" onclick="if(event.target===this)closeWatch()">
+  <div class="modal-sheet">
+    <div class="modal-title">&#128276; Watchlist <div class="modal-close" onclick="closeWatch()">&#10005;</div></div>
+    <div class="ntf-row" onclick="toggleNotif()">
+      <div><div class="ntf-label">Notifications push</div><div class="ntf-sub" id="ntf-sub">Tap pour activer</div></div>
+      <div class="toggle-track" id="ntf-track"><div class="toggle-thumb"></div></div>
+    </div>
+    <div class="watch-input-row">
+      <input class="watch-input" id="watch-input" type="text" placeholder="Ex: Dragonite, Larvitar..." onkeydown="if(event.key==='Enter')addWatch()">
+      <button class="btn-add" onclick="addWatch()">+ Add</button>
+    </div>
+    <div id="watch-list"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="settings-modal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal-sheet">
+    <div class="modal-title">&#9881;&#65039; Filtres <div class="modal-close" onclick="closeSettings()">&#10005;</div></div>
+    <div class="fsec"><div class="fsec-label">IV minimum</div><div class="slider-row"><input type="range" id="iv-slider" min="0" max="100" value="0" step="5" oninput="ivMin=parseInt(this.value);document.getElementById('iv-val').textContent=this.value+'%';applyFilters()"><div class="slider-val" id="iv-val">0%</div></div></div>
+    <div class="fsec"><div class="fsec-label">CP minimum</div><div class="slider-row"><input type="range" id="cp-slider" min="0" max="4000" value="0" step="100" oninput="cpMin=parseInt(this.value);document.getElementById('cp-val').textContent=this.value;applyFilters()"><div class="slider-val" id="cp-val">0</div></div></div>
+    <div class="fsec"><div class="fsec-label">Type</div><div class="type-grid" id="type-grid"></div></div>
+    <div style="display:flex;gap:8px;margin-top:16px"><div class="pbtn" onclick="resetFilters()">Reset</div><div class="pbtn primary" onclick="closeSettings()">OK</div></div>
+  </div>
+</div>
+<div id="install-banner">
+  <div class="install-body"><div class="install-title">Installer PokeTracker</div><div class="install-sub">Partager &#8594; "Sur l'ecran d'accueil"</div></div>
+  <div class="install-close" onclick="document.getElementById('install-banner').classList.remove('show')">&#10005;</div>
+</div>
+<script>
+const POKE_DICT = {
+  "460":{"n":"Abomasnow","t":"grass"},
+  "63":{"n":"Abra","t":"psychic"},
+  "359":{"n":"Absol","t":"dark"},
+  "617":{"n":"Accelgor","t":"bug"},
+  "142":{"n":"Aerodactyl","t":"flying"},
+  "306":{"n":"Aggron","t":"rock"},
+  "190":{"n":"Aipom","t":"normal"},
+  "65":{"n":"Alakazam","t":"psychic"},
+  "594":{"n":"Alomomola","t":"water"},
+  "334":{"n":"Altaria","t":"dragon"},
+  "698":{"n":"Amaura","t":"rock"},
+  "424":{"n":"Ambipom","t":"normal"},
+  "591":{"n":"Amoonguss","t":"grass"},
+  "181":{"n":"Ampharos","t":"electric"},
+  "347":{"n":"Anorith","t":"rock"},
+  "842":{"n":"Appletun","t":"grass"},
+  "840":{"n":"Applin","t":"grass"},
+  "752":{"n":"Araquanid","t":"water"},
+  "24":{"n":"Arbok","t":"poison"},
+  "930":{"n":"Arboliva","t":"grass"},
+  "59":{"n":"Arcanine","t":"fire"},
+  "566":{"n":"Archen","t":"rock"},
+  "567":{"n":"Archeops","t":"rock"},
+  "168":{"n":"Ariados","t":"bug"},
+  "348":{"n":"Armaldo","t":"rock"},
+  "936":{"n":"Armarouge","t":"fire"},
+  "683":{"n":"Aromatisse","t":"fairy"},
+  "304":{"n":"Aron","t":"rock"},
+  "144":{"n":"Articuno","t":"ice"},
+  "531":{"n":"Audino","t":"normal"},
+  "699":{"n":"Aurorus","t":"rock"},
+  "713":{"n":"Avalugg","t":"ice"},
+  "610":{"n":"Axew","t":"dragon"},
+  "482":{"n":"Azelf","t":"psychic"},
+  "184":{"n":"Azumarill","t":"water"},
+  "298":{"n":"Azurill","t":"normal"},
+  "371":{"n":"Bagon","t":"dragon"},
+  "343":{"n":"Baltoy","t":"ground"},
+  "354":{"n":"Banette","t":"ghost"},
+  "689":{"n":"Barbaracle","t":"rock"},
+  "339":{"n":"Barboach","t":"water"},
+  "550":{"n":"Basculin","t":"water"},
+  "411":{"n":"Bastiodon","t":"rock"},
+  "153":{"n":"Bayleef","t":"grass"},
+  "614":{"n":"Beartic","t":"ice"},
+  "267":{"n":"Beautifly","t":"bug"},
+  "15":{"n":"Beedrill","t":"poison"},
+  "606":{"n":"Beheeyem","t":"psychic"},
+  "374":{"n":"Beldum","t":"psychic"},
+  "939":{"n":"Bellibolt","t":"electric"},
+  "182":{"n":"Bellossom","t":"grass"},
+  "69":{"n":"Bellsprout","t":"grass"},
+  "712":{"n":"Bergmite","t":"ice"},
+  "760":{"n":"Bewear","t":"normal"},
+  "400":{"n":"Bibarel","t":"normal"},
+  "399":{"n":"Bidoof","t":"normal"},
+  "688":{"n":"Binacle","t":"rock"},
+  "625":{"n":"Bisharp","t":"dark"},
+  "9":{"n":"Blastoise","t":"water"},
+  "257":{"n":"Blaziken","t":"fire"},
+  "824":{"n":"Blipbug","t":"bug"},
+  "242":{"n":"Blissey","t":"normal"},
+  "522":{"n":"Blitzle","t":"electric"},
+  "525":{"n":"Boldore","t":"rock"},
+  "836":{"n":"Boltund","t":"electric"},
+  "962":{"n":"Bombirdier","t":"flying"},
+  "438":{"n":"Bonsly","t":"rock"},
+  "626":{"n":"Bouffalant","t":"normal"},
+  "761":{"n":"Bounsweet","t":"grass"},
+  "654":{"n":"Braixen","t":"fire"},
+  "628":{"n":"Braviary","t":"normal"},
+  "286":{"n":"Breloom","t":"grass"},
+  "729":{"n":"Brionne","t":"water"},
+  "437":{"n":"Bronzong","t":"steel"},
+  "436":{"n":"Bronzor","t":"steel"},
+  "779":{"n":"Bruxish","t":"water"},
+  "406":{"n":"Budew","t":"grass"},
+  "418":{"n":"Buizel","t":"water"},
+  "1":{"n":"Bulbasaur","t":"grass"},
+  "427":{"n":"Buneary","t":"normal"},
+  "659":{"n":"Bunnelby","t":"normal"},
+  "412":{"n":"Burmy","t":"bug"},
+  "12":{"n":"Butterfree","t":"flying"},
+  "331":{"n":"Cacnea","t":"grass"},
+  "332":{"n":"Cacturne","t":"grass"},
+  "323":{"n":"Camerupt","t":"fire"},
+  "703":{"n":"Carbink","t":"rock"},
+  "838":{"n":"Carkol","t":"rock"},
+  "455":{"n":"Carnivine","t":"grass"},
+  "565":{"n":"Carracosta","t":"water"},
+  "318":{"n":"Carvanha","t":"water"},
+  "268":{"n":"Cascoon","t":"bug"},
+  "351":{"n":"Castform","t":"normal"},
+  "10":{"n":"Caterpie","t":"bug"},
+  "251":{"n":"Celebi","t":"psychic"},
+  "851":{"n":"Centiskorch","t":"fire"},
+  "937":{"n":"Ceruledge","t":"fire"},
+  "975":{"n":"Cetitan","t":"ice"},
+  "974":{"n":"Cetoddle","t":"ice"},
+  "609":{"n":"Chandelure","t":"ghost"},
+  "113":{"n":"Chansey","t":"normal"},
+  "935":{"n":"Charcadet","t":"fire"},
+  "6":{"n":"Charizard","t":"fire"},
+  "737":{"n":"Charjabug","t":"bug"},
+  "4":{"n":"Charmander","t":"fire"},
+  "5":{"n":"Charmeleon","t":"fire"},
+  "441":{"n":"Chatot","t":"normal"},
+  "421":{"n":"Cherrim","t":"grass"},
+  "420":{"n":"Cherubi","t":"grass"},
+  "652":{"n":"Chesnaught","t":"grass"},
+  "650":{"n":"Chespin","t":"grass"},
+  "152":{"n":"Chikorita","t":"grass"},
+  "390":{"n":"Chimchar","t":"fire"},
+  "358":{"n":"Chimecho","t":"psychic"},
+  "170":{"n":"Chinchou","t":"water"},
+  "433":{"n":"Chingling","t":"psychic"},
+  "573":{"n":"Cinccino","t":"normal"},
+  "815":{"n":"Cinderace","t":"fire"},
+  "366":{"n":"Clamperl","t":"water"},
+  "692":{"n":"Clauncher","t":"water"},
+  "693":{"n":"Clawitzer","t":"water"},
+  "344":{"n":"Claydol","t":"ground"},
+  "36":{"n":"Clefable","t":"fairy"},
+  "35":{"n":"Clefairy","t":"fairy"},
+  "173":{"n":"Cleffa","t":"fairy"},
+  "852":{"n":"Clobbopus","t":"fighting"},
+  "91":{"n":"Cloyster","t":"water"},
+  "839":{"n":"Coalossal","t":"rock"},
+  "638":{"n":"Cobalion","t":"steel"},
+  "563":{"n":"Cofagrigus","t":"ghost"},
+  "415":{"n":"Combee","t":"bug"},
+  "256":{"n":"Combusken","t":"fire"},
+  "764":{"n":"Comfey","t":"fairy"},
+  "534":{"n":"Conkeldurr","t":"fighting"},
+  "341":{"n":"Corphish","t":"water"},
+  "222":{"n":"Corsola","t":"water"},
+  "823":{"n":"Corviknight","t":"flying"},
+  "822":{"n":"Corvisquire","t":"flying"},
+  "546":{"n":"Cottonee","t":"grass"},
+  "739":{"n":"Crabrawler","t":"fighting"},
+  "346":{"n":"Cradily","t":"grass"},
+  "408":{"n":"Cranidos","t":"rock"},
+  "342":{"n":"Crawdaunt","t":"water"},
+  "488":{"n":"Cresselia","t":"psychic"},
+  "453":{"n":"Croagunk","t":"poison"},
+  "169":{"n":"Crobat","t":"flying"},
+  "910":{"n":"Crocalor","t":"fire"},
+  "159":{"n":"Croconaw","t":"water"},
+  "558":{"n":"Crustle","t":"bug"},
+  "615":{"n":"Cryogonal","t":"ice"},
+  "613":{"n":"Cubchoo","t":"ice"},
+  "104":{"n":"Cubone","t":"ground"},
+  "742":{"n":"Cutiefly","t":"bug"},
+  "155":{"n":"Cyndaquil","t":"fire"},
+  "927":{"n":"Dachsbun","t":"fairy"},
+  "491":{"n":"Darkrai","t":"dark"},
+  "555":{"n":"Darmanitan","t":"fire"},
+  "723":{"n":"Dartrix","t":"grass"},
+  "554":{"n":"Darumaka","t":"fire"},
+  "724":{"n":"Decidueye","t":"grass"},
+  "702":{"n":"Dedenne","t":"electric"},
+  "585":{"n":"Deerling","t":"normal"},
+  "633":{"n":"Deino","t":"dark"},
+  "301":{"n":"Delcatty","t":"normal"},
+  "225":{"n":"Delibird","t":"ice"},
+  "655":{"n":"Delphox","t":"fire"},
+  "386":{"n":"Deoxys","t":"psychic"},
+  "87":{"n":"Dewgong","t":"water"},
+  "502":{"n":"Dewott","t":"water"},
+  "751":{"n":"Dewpider","t":"water"},
+  "781":{"n":"Dhelmise","t":"ghost"},
+  "483":{"n":"Dialga","t":"dragon"},
+  "719":{"n":"Diancie","t":"rock"},
+  "660":{"n":"Diggersby","t":"normal"},
+  "50":{"n":"Diglett","t":"ground"},
+  "132":{"n":"Ditto","t":"normal"},
+  "85":{"n":"Dodrio","t":"normal"},
+  "84":{"n":"Doduo","t":"normal"},
+  "929":{"n":"Dolliv","t":"grass"},
+  "977":{"n":"Dondozo","t":"water"},
+  "232":{"n":"Donphan","t":"ground"},
+  "825":{"n":"Dottler","t":"bug"},
+  "680":{"n":"Doublade","t":"steel"},
+  "887":{"n":"Dragapult","t":"dragon"},
+  "148":{"n":"Dragonair","t":"dragon"},
+  "149":{"n":"Dragonite","t":"dragon"},
+  "886":{"n":"Drakloak","t":"dragon"},
+  "780":{"n":"Drampa","t":"normal"},
+  "452":{"n":"Drapion","t":"dark"},
+  "147":{"n":"Dratini","t":"dragon"},
+  "885":{"n":"Dreepy","t":"dragon"},
+  "426":{"n":"Drifblim","t":"ghost"},
+  "425":{"n":"Drifloon","t":"ghost"},
+  "529":{"n":"Drilbur","t":"ground"},
+  "96":{"n":"Drowzee","t":"psychic"},
+  "621":{"n":"Druddigon","t":"dragon"},
+  "832":{"n":"Dubwool","t":"normal"},
+  "580":{"n":"Ducklett","t":"water"},
+  "51":{"n":"Dugtrio","t":"ground"},
+  "206":{"n":"Dunsparce","t":"normal"},
+  "578":{"n":"Duosion","t":"psychic"},
+  "884":{"n":"Duraludon","t":"steel"},
+  "632":{"n":"Durant","t":"bug"},
+  "356":{"n":"Dusclops","t":"ghost"},
+  "477":{"n":"Dusknoir","t":"ghost"},
+  "355":{"n":"Duskull","t":"ghost"},
+  "269":{"n":"Dustox","t":"bug"},
+  "557":{"n":"Dwebble","t":"bug"},
+  "603":{"n":"Eelektrik","t":"electric"},
+  "604":{"n":"Eelektross","t":"electric"},
+  "133":{"n":"Eevee","t":"normal"},
+  "23":{"n":"Ekans","t":"poison"},
+  "830":{"n":"Eldegoss","t":"grass"},
+  "125":{"n":"Electabuzz","t":"electric"},
+  "466":{"n":"Electivire","t":"electric"},
+  "309":{"n":"Electrike","t":"electric"},
+  "101":{"n":"Electrode","t":"electric"},
+  "239":{"n":"Elekid","t":"electric"},
+  "605":{"n":"Elgyem","t":"psychic"},
+  "500":{"n":"Emboar","t":"fire"},
+  "587":{"n":"Emolga","t":"electric"},
+  "395":{"n":"Empoleon","t":"water"},
+  "244":{"n":"Entei","t":"fire"},
+  "589":{"n":"Escavalier","t":"bug"},
+  "196":{"n":"Espeon","t":"psychic"},
+  "677":{"n":"Espurr","t":"psychic"},
+  "530":{"n":"Excadrill","t":"ground"},
+  "102":{"n":"Exeggcute","t":"grass"},
+  "103":{"n":"Exeggutor","t":"grass"},
+  "295":{"n":"Exploud","t":"normal"},
+  "870":{"n":"Falinks","t":"fighting"},
+  "83":{"n":"Farfetchd","t":"normal"},
+  "22":{"n":"Fearow","t":"normal"},
+  "349":{"n":"Feebas","t":"water"},
+  "653":{"n":"Fennekin","t":"fire"},
+  "160":{"n":"Feraligatr","t":"water"},
+  "597":{"n":"Ferroseed","t":"grass"},
+  "598":{"n":"Ferrothorn","t":"grass"},
+  "926":{"n":"Fidough","t":"fairy"},
+  "456":{"n":"Finneon","t":"water"},
+  "180":{"n":"Flaaffy","t":"electric"},
+  "669":{"n":"Flabebe","t":"fairy"},
+  "973":{"n":"Flamigo","t":"flying"},
+  "841":{"n":"Flapple","t":"grass"},
+  "136":{"n":"Flareon","t":"fire"},
+  "662":{"n":"Fletchinder","t":"fire"},
+  "661":{"n":"Fletchling","t":"normal"},
+  "419":{"n":"Floatzel","t":"water"},
+  "670":{"n":"Floette","t":"fairy"},
+  "907":{"n":"Floragato","t":"grass"},
+  "671":{"n":"Florges","t":"fairy"},
+  "330":{"n":"Flygon","t":"dragon"},
+  "753":{"n":"Fomantis","t":"grass"},
+  "590":{"n":"Foongus","t":"grass"},
+  "205":{"n":"Forretress","t":"bug"},
+  "611":{"n":"Fraxure","t":"dragon"},
+  "592":{"n":"Frillish","t":"water"},
+  "656":{"n":"Froakie","t":"water"},
+  "657":{"n":"Frogadier","t":"water"},
+  "478":{"n":"Froslass","t":"ice"},
+  "873":{"n":"Frosmoth","t":"ice"},
+  "909":{"n":"Fuecoco","t":"fire"},
+  "676":{"n":"Furfrou","t":"normal"},
+  "162":{"n":"Furret","t":"normal"},
+  "444":{"n":"Gabite","t":"dragon"},
+  "475":{"n":"Gallade","t":"psychic"},
+  "596":{"n":"Galvantula","t":"bug"},
+  "569":{"n":"Garbodor","t":"poison"},
+  "445":{"n":"Garchomp","t":"dragon"},
+  "282":{"n":"Gardevoir","t":"psychic"},
+  "934":{"n":"Garganacl","t":"rock"},
+  "92":{"n":"Gastly","t":"poison"},
+  "423":{"n":"Gastrodon","t":"water"},
+  "94":{"n":"Gengar","t":"poison"},
+  "74":{"n":"Geodude","t":"ground"},
+  "443":{"n":"Gible","t":"dragon"},
+  "526":{"n":"Gigalith","t":"rock"},
+  "999":{"n":"Gimmighoul","t":"ghost"},
+  "203":{"n":"Girafarig","t":"normal"},
+  "487":{"n":"Giratina","t":"dragon"},
+  "471":{"n":"Glaceon","t":"ice"},
+  "362":{"n":"Glalie","t":"ice"},
+  "431":{"n":"Glameow","t":"normal"},
+  "207":{"n":"Gligar","t":"flying"},
+  "472":{"n":"Gliscor","t":"flying"},
+  "44":{"n":"Gloom","t":"grass"},
+  "673":{"n":"Gogoat","t":"grass"},
+  "42":{"n":"Golbat","t":"flying"},
+  "118":{"n":"Goldeen","t":"water"},
+  "55":{"n":"Golduck","t":"water"},
+  "76":{"n":"Golem","t":"ground"},
+  "622":{"n":"Golett","t":"ground"},
+  "768":{"n":"Golisopod","t":"bug"},
+  "623":{"n":"Golurk","t":"ground"},
+  "706":{"n":"Goodra","t":"dragon"},
+  "704":{"n":"Goomy","t":"dragon"},
+  "368":{"n":"Gorebyss","t":"water"},
+  "829":{"n":"Gossifleur","t":"grass"},
+  "574":{"n":"Gothita","t":"psychic"},
+  "576":{"n":"Gothitelle","t":"psychic"},
+  "575":{"n":"Gothorita","t":"psychic"},
+  "711":{"n":"Gourgeist","t":"grass"},
+  "210":{"n":"Granbull","t":"fairy"},
+  "75":{"n":"Graveler","t":"ground"},
+  "971":{"n":"Greavard","t":"ghost"},
+  "820":{"n":"Greedent","t":"normal"},
+  "658":{"n":"Greninja","t":"water"},
+  "88":{"n":"Grimer","t":"poison"},
+  "861":{"n":"Grimmsnarl","t":"dark"},
+  "810":{"n":"Grookey","t":"grass"},
+  "388":{"n":"Grotle","t":"grass"},
+  "253":{"n":"Grovyle","t":"grass"},
+  "58":{"n":"Growlithe","t":"fire"},
+  "736":{"n":"Grubbin","t":"bug"},
+  "326":{"n":"Grumpig","t":"psychic"},
+  "316":{"n":"Gulpin","t":"poison"},
+  "533":{"n":"Gurdurr","t":"fighting"},
+  "130":{"n":"Gyarados","t":"water"},
+  "440":{"n":"Happiny","t":"normal"},
+  "297":{"n":"Hariyama","t":"fighting"},
+  "856":{"n":"Hatenna","t":"psychic"},
+  "858":{"n":"Hatterene","t":"psychic"},
+  "857":{"n":"Hattrem","t":"psychic"},
+  "93":{"n":"Haunter","t":"poison"},
+  "701":{"n":"Hawlucha","t":"fighting"},
+  "612":{"n":"Haxorus","t":"dragon"},
+  "631":{"n":"Heatmor","t":"fire"},
+  "695":{"n":"Heliolisk","t":"electric"},
+  "694":{"n":"Helioptile","t":"electric"},
+  "214":{"n":"Heracross","t":"bug"},
+  "507":{"n":"Herdier","t":"normal"},
+  "449":{"n":"Hippopotas","t":"ground"},
+  "450":{"n":"Hippowdon","t":"ground"},
+  "107":{"n":"Hitmonchan","t":"fighting"},
+  "106":{"n":"Hitmonlee","t":"fighting"},
+  "237":{"n":"Hitmontop","t":"fighting"},
+  "430":{"n":"Honchkrow","t":"dark"},
+  "679":{"n":"Honedge","t":"steel"},
+  "163":{"n":"Hoothoot","t":"normal"},
+  "187":{"n":"Hoppip","t":"grass"},
+  "116":{"n":"Horsea","t":"water"},
+  "229":{"n":"Houndoom","t":"fire"},
+  "228":{"n":"Houndour","t":"fire"},
+  "972":{"n":"Houndstone","t":"ghost"},
+  "367":{"n":"Huntail","t":"water"},
+  "635":{"n":"Hydreigon","t":"dark"},
+  "97":{"n":"Hypno","t":"psychic"},
+  "174":{"n":"Igglybuff","t":"normal"},
+  "314":{"n":"Illumise","t":"bug"},
+  "859":{"n":"Impidimp","t":"dark"},
+  "727":{"n":"Incineroar","t":"fire"},
+  "876":{"n":"Indeedee","t":"normal"},
+  "392":{"n":"Infernape","t":"fire"},
+  "686":{"n":"Inkay","t":"dark"},
+  "2":{"n":"Ivysaur","t":"grass"},
+  "782":{"n":"Jangmo-o","t":"dragon"},
+  "593":{"n":"Jellicent","t":"water"},
+  "39":{"n":"Jigglypuff","t":"normal"},
+  "385":{"n":"Jirachi","t":"steel"},
+  "135":{"n":"Jolteon","t":"electric"},
+  "595":{"n":"Joltik","t":"bug"},
+  "189":{"n":"Jumpluff","t":"grass"},
+  "124":{"n":"Jynx","t":"ice"},
+  "140":{"n":"Kabuto","t":"water"},
+  "141":{"n":"Kabutops","t":"water"},
+  "64":{"n":"Kadabra","t":"psychic"},
+  "14":{"n":"Kakuna","t":"poison"},
+  "115":{"n":"Kangaskhan","t":"normal"},
+  "588":{"n":"Karrablast","t":"bug"},
+  "352":{"n":"Kecleon","t":"normal"},
+  "941":{"n":"Kilowattrel","t":"electric"},
+  "983":{"n":"Kingambit","t":"dark"},
+  "230":{"n":"Kingdra","t":"water"},
+  "99":{"n":"Kingler","t":"water"},
+  "281":{"n":"Kirlia","t":"psychic"},
+  "600":{"n":"Klang","t":"steel"},
+  "950":{"n":"Klawf","t":"rock"},
+  "707":{"n":"Klefki","t":"steel"},
+  "599":{"n":"Klink","t":"steel"},
+  "601":{"n":"Klinklang","t":"steel"},
+  "109":{"n":"Koffing","t":"poison"},
+  "98":{"n":"Krabby","t":"water"},
+  "401":{"n":"Kricketot","t":"bug"},
+  "402":{"n":"Kricketune","t":"bug"},
+  "552":{"n":"Krokorok","t":"ground"},
+  "553":{"n":"Krookodile","t":"ground"},
+  "305":{"n":"Lairon","t":"rock"},
+  "608":{"n":"Lampent","t":"ghost"},
+  "171":{"n":"Lanturn","t":"water"},
+  "131":{"n":"Lapras","t":"water"},
+  "636":{"n":"Larvesta","t":"bug"},
+  "246":{"n":"Larvitar","t":"ground"},
+  "470":{"n":"Leafeon","t":"grass"},
+  "542":{"n":"Leavanny","t":"bug"},
+  "915":{"n":"Lechonk","t":"normal"},
+  "166":{"n":"Ledian","t":"bug"},
+  "165":{"n":"Ledyba","t":"bug"},
+  "463":{"n":"Lickilicky","t":"normal"},
+  "108":{"n":"Lickitung","t":"normal"},
+  "510":{"n":"Liepard","t":"dark"},
+  "345":{"n":"Lileep","t":"grass"},
+  "506":{"n":"Lillipup","t":"normal"},
+  "264":{"n":"Linoone","t":"normal"},
+  "667":{"n":"Litleo","t":"fire"},
+  "725":{"n":"Litten","t":"fire"},
+  "607":{"n":"Litwick","t":"ghost"},
+  "271":{"n":"Lombre","t":"water"},
+  "428":{"n":"Lopunny","t":"normal"},
+  "270":{"n":"Lotad","t":"water"},
+  "294":{"n":"Loudred","t":"normal"},
+  "448":{"n":"Lucario","t":"fighting"},
+  "272":{"n":"Ludicolo","t":"water"},
+  "457":{"n":"Lumineon","t":"water"},
+  "337":{"n":"Lunatone","t":"rock"},
+  "754":{"n":"Lurantis","t":"grass"},
+  "370":{"n":"Luvdisc","t":"water"},
+  "404":{"n":"Luxio","t":"electric"},
+  "405":{"n":"Luxray","t":"electric"},
+  "68":{"n":"Machamp","t":"fighting"},
+  "67":{"n":"Machoke","t":"fighting"},
+  "66":{"n":"Machop","t":"fighting"},
+  "240":{"n":"Magby","t":"fire"},
+  "219":{"n":"Magcargo","t":"fire"},
+  "129":{"n":"Magikarp","t":"water"},
+  "126":{"n":"Magmar","t":"fire"},
+  "467":{"n":"Magmortar","t":"fire"},
+  "81":{"n":"Magnemite","t":"electric"},
+  "82":{"n":"Magneton","t":"electric"},
+  "462":{"n":"Magnezone","t":"electric"},
+  "296":{"n":"Makuhita","t":"fighting"},
+  "687":{"n":"Malamar","t":"dark"},
+  "473":{"n":"Mamoswine","t":"ice"},
+  "630":{"n":"Mandibuzz","t":"dark"},
+  "310":{"n":"Manectric","t":"electric"},
+  "56":{"n":"Mankey","t":"fighting"},
+  "226":{"n":"Mantine","t":"water"},
+  "458":{"n":"Mantyke","t":"water"},
+  "556":{"n":"Maractus","t":"grass"},
+  "747":{"n":"Mareanie","t":"poison"},
+  "179":{"n":"Mareep","t":"electric"},
+  "183":{"n":"Marill","t":"water"},
+  "105":{"n":"Marowak","t":"ground"},
+  "259":{"n":"Marshtomp","t":"water"},
+  "284":{"n":"Masquerain","t":"bug"},
+  "925":{"n":"Maushold","t":"normal"},
+  "303":{"n":"Mawile","t":"fairy"},
+  "308":{"n":"Medicham","t":"fighting"},
+  "307":{"n":"Meditite","t":"fighting"},
+  "154":{"n":"Meganium","t":"grass"},
+  "908":{"n":"Meowscarada","t":"grass"},
+  "678":{"n":"Meowstic","t":"psychic"},
+  "52":{"n":"Meowth","t":"normal"},
+  "376":{"n":"Metagross","t":"psychic"},
+  "375":{"n":"Metang","t":"psychic"},
+  "11":{"n":"Metapod","t":"bug"},
+  "151":{"n":"Mew","t":"psychic"},
+  "150":{"n":"Mewtwo","t":"psychic"},
+  "619":{"n":"Mienfoo","t":"fighting"},
+  "620":{"n":"Mienshao","t":"fighting"},
+  "262":{"n":"Mightyena","t":"dark"},
+  "350":{"n":"Milotic","t":"water"},
+  "241":{"n":"Miltank","t":"normal"},
+  "572":{"n":"Minccino","t":"normal"},
+  "312":{"n":"Minun","t":"electric"},
+  "200":{"n":"Misdreavus","t":"ghost"},
+  "429":{"n":"Mismagius","t":"ghost"},
+  "391":{"n":"Monferno","t":"fire"},
+  "755":{"n":"Morelull","t":"grass"},
+  "860":{"n":"Morgrem","t":"dark"},
+  "877":{"n":"Morpeko","t":"electric"},
+  "414":{"n":"Mothim","t":"bug"},
+  "258":{"n":"Mudkip","t":"water"},
+  "89":{"n":"Muk","t":"poison"},
+  "446":{"n":"Munchlax","t":"normal"},
+  "517":{"n":"Munna","t":"psychic"},
+  "198":{"n":"Murkrow","t":"dark"},
+  "518":{"n":"Musharna","t":"psychic"},
+  "177":{"n":"Natu","t":"psychic"},
+  "827":{"n":"Nickit","t":"dark"},
+  "34":{"n":"Nidoking","t":"poison"},
+  "31":{"n":"Nidoqueen","t":"poison"},
+  "29":{"n":"NidoranF","t":"poison"},
+  "32":{"n":"NidoranM","t":"poison"},
+  "30":{"n":"Nidorina","t":"poison"},
+  "33":{"n":"Nidorino","t":"poison"},
+  "290":{"n":"Nincada","t":"bug"},
+  "38":{"n":"Ninetales","t":"fire"},
+  "291":{"n":"Ninjask","t":"bug"},
+  "164":{"n":"Noctowl","t":"normal"},
+  "714":{"n":"Noibat","t":"flying"},
+  "715":{"n":"Noivern","t":"flying"},
+  "299":{"n":"Nosepass","t":"rock"},
+  "322":{"n":"Numel","t":"fire"},
+  "274":{"n":"Nuzleaf","t":"grass"},
+  "919":{"n":"Nymble","t":"bug"},
+  "224":{"n":"Octillery","t":"water"},
+  "43":{"n":"Oddish","t":"grass"},
+  "916":{"n":"Oinkologne","t":"normal"},
+  "138":{"n":"Omanyte","t":"water"},
+  "139":{"n":"Omastar","t":"water"},
+  "95":{"n":"Onix","t":"ground"},
+  "501":{"n":"Oshawott","t":"water"},
+  "417":{"n":"Pachirisu","t":"electric"},
+  "770":{"n":"Palossand","t":"ghost"},
+  "536":{"n":"Palpitoad","t":"water"},
+  "674":{"n":"Pancham","t":"fighting"},
+  "675":{"n":"Pangoro","t":"fighting"},
+  "515":{"n":"Panpour","t":"water"},
+  "511":{"n":"Pansage","t":"grass"},
+  "513":{"n":"Pansear","t":"fire"},
+  "46":{"n":"Paras","t":"bug"},
+  "47":{"n":"Parasect","t":"bug"},
+  "504":{"n":"Patrat","t":"normal"},
+  "921":{"n":"Pawmi","t":"electric"},
+  "922":{"n":"Pawmo","t":"electric"},
+  "923":{"n":"Pawmot","t":"electric"},
+  "624":{"n":"Pawniard","t":"dark"},
+  "279":{"n":"Pelipper","t":"water"},
+  "53":{"n":"Persian","t":"normal"},
+  "548":{"n":"Petilil","t":"grass"},
+  "231":{"n":"Phanpy","t":"ground"},
+  "708":{"n":"Phantump","t":"ghost"},
+  "16":{"n":"Pidgey","t":"normal"},
+  "17":{"n":"Pidgeotto","t":"normal"},
+  "18":{"n":"Pidgeot","t":"normal"},
+  "519":{"n":"Pidove","t":"normal"},
+  "499":{"n":"Pignite","t":"fire"},
+  "25":{"n":"Pikachu","t":"electric"},
+  "731":{"n":"Pikipek","t":"normal"},
+  "221":{"n":"Piloswine","t":"ice"},
+  "204":{"n":"Pineco","t":"bug"},
+  "127":{"n":"Pinsir","t":"bug"},
+  "393":{"n":"Piplup","t":"water"},
+  "311":{"n":"Plusle","t":"electric"},
+  "186":{"n":"Politoed","t":"water"},
+  "60":{"n":"Poliwag","t":"water"},
+  "61":{"n":"Poliwhirl","t":"water"},
+  "62":{"n":"Poliwrath","t":"water"},
+  "77":{"n":"Ponyta","t":"fire"},
+  "261":{"n":"Poochyena","t":"dark"},
+  "728":{"n":"Popplio","t":"water"},
+  "137":{"n":"Porygon","t":"normal"},
+  "474":{"n":"Porygon-Z","t":"normal"},
+  "233":{"n":"Porygon2","t":"normal"},
+  "57":{"n":"Primeape","t":"fighting"},
+  "394":{"n":"Prinplup","t":"water"},
+  "476":{"n":"Probopass","t":"rock"},
+  "54":{"n":"Psyduck","t":"water"},
+  "710":{"n":"Pumpkaboo","t":"grass"},
+  "247":{"n":"Pupitar","t":"ground"},
+  "509":{"n":"Purrloin","t":"dark"},
+  "432":{"n":"Purugly","t":"normal"},
+  "668":{"n":"Pyroar","t":"normal"},
+  "195":{"n":"Quagsire","t":"water"},
+  "914":{"n":"Quaquaval","t":"water"},
+  "912":{"n":"Quaxly","t":"water"},
+  "913":{"n":"Quaxwell","t":"water"},
+  "156":{"n":"Quilava","t":"fire"},
+  "651":{"n":"Quilladin","t":"grass"},
+  "211":{"n":"Qwilfish","t":"water"},
+  "26":{"n":"Raichu","t":"electric"},
+  "280":{"n":"Ralts","t":"psychic"},
+  "409":{"n":"Rampardos","t":"rock"},
+  "78":{"n":"Rapidash","t":"fire"},
+  "20":{"n":"Raticate","t":"normal"},
+  "19":{"n":"Rattata","t":"normal"},
+  "378":{"n":"Regice","t":"ice"},
+  "369":{"n":"Relicanth","t":"water"},
+  "223":{"n":"Remoraid","t":"water"},
+  "579":{"n":"Reuniclus","t":"psychic"},
+  "112":{"n":"Rhydon","t":"ground"},
+  "111":{"n":"Rhyhorn","t":"ground"},
+  "464":{"n":"Rhyperior","t":"ground"},
+  "743":{"n":"Ribombee","t":"bug"},
+  "447":{"n":"Riolu","t":"fighting"},
+  "744":{"n":"Rockruff","t":"rock"},
+  "524":{"n":"Roggenrola","t":"rock"},
+  "837":{"n":"Rolycoly","t":"rock"},
+  "821":{"n":"Rookidee","t":"flying"},
+  "315":{"n":"Roselia","t":"grass"},
+  "407":{"n":"Roserade","t":"grass"},
+  "479":{"n":"Rotom","t":"electric"},
+  "722":{"n":"Rowlet","t":"grass"},
+  "627":{"n":"Rufflet","t":"normal"},
+  "302":{"n":"Sableye","t":"dark"},
+  "373":{"n":"Salamence","t":"dragon"},
+  "757":{"n":"Salandit","t":"poison"},
+  "503":{"n":"Samurott","t":"water"},
+  "551":{"n":"Sandile","t":"ground"},
+  "27":{"n":"Sandshrew","t":"ground"},
+  "28":{"n":"Sandslash","t":"ground"},
+  "769":{"n":"Sandygast","t":"ghost"},
+  "539":{"n":"Sawk","t":"fighting"},
+  "586":{"n":"Sawsbuck","t":"normal"},
+  "664":{"n":"Scatterbug","t":"bug"},
+  "254":{"n":"Sceptile","t":"grass"},
+  "212":{"n":"Scizor","t":"bug"},
+  "545":{"n":"Scolipede","t":"bug"},
+  "813":{"n":"Scorbunny","t":"fire"},
+  "560":{"n":"Scrafty","t":"dark"},
+  "559":{"n":"Scraggy","t":"dark"},
+  "123":{"n":"Scyther","t":"flying"},
+  "117":{"n":"Seadra","t":"water"},
+  "119":{"n":"Seaking","t":"water"},
+  "364":{"n":"Sealeo","t":"water"},
+  "273":{"n":"Seedot","t":"grass"},
+  "86":{"n":"Seel","t":"water"},
+  "537":{"n":"Seismitoad","t":"water"},
+  "161":{"n":"Sentret","t":"normal"},
+  "497":{"n":"Serperior","t":"grass"},
+  "496":{"n":"Servine","t":"grass"},
+  "336":{"n":"Seviper","t":"poison"},
+  "540":{"n":"Sewaddle","t":"bug"},
+  "319":{"n":"Sharpedo","t":"water"},
+  "292":{"n":"Shedinja","t":"bug"},
+  "372":{"n":"Shelgon","t":"dragon"},
+  "90":{"n":"Shellder","t":"water"},
+  "422":{"n":"Shellos","t":"water"},
+  "616":{"n":"Shelmet","t":"bug"},
+  "410":{"n":"Shieldon","t":"rock"},
+  "275":{"n":"Shiftry","t":"grass"},
+  "403":{"n":"Shinx","t":"electric"},
+  "285":{"n":"Shroomish","t":"grass"},
+  "213":{"n":"Shuckle","t":"rock"},
+  "353":{"n":"Shuppet","t":"ghost"},
+  "561":{"n":"Sigilyph","t":"psychic"},
+  "266":{"n":"Silcoon","t":"bug"},
+  "854":{"n":"Sinistea","t":"ghost"},
+  "850":{"n":"Sizzlipede","t":"fire"},
+  "227":{"n":"Skarmory","t":"flying"},
+  "672":{"n":"Skiddo","t":"grass"},
+  "188":{"n":"Skiploom","t":"grass"},
+  "300":{"n":"Skitty","t":"normal"},
+  "451":{"n":"Skorupi","t":"poison"},
+  "435":{"n":"Skuntank","t":"dark"},
+  "819":{"n":"Skwovet","t":"normal"},
+  "289":{"n":"Slaking","t":"normal"},
+  "287":{"n":"Slakoth","t":"normal"},
+  "705":{"n":"Sliggoo","t":"dragon"},
+  "80":{"n":"Slowbro","t":"water"},
+  "199":{"n":"Slowking","t":"water"},
+  "79":{"n":"Slowpoke","t":"water"},
+  "218":{"n":"Slugma","t":"fire"},
+  "685":{"n":"Slurpuff","t":"fairy"},
+  "235":{"n":"Smeargle","t":"normal"},
+  "928":{"n":"Smoliv","t":"grass"},
+  "238":{"n":"Smoochum","t":"ice"},
+  "215":{"n":"Sneasel","t":"ice"},
+  "495":{"n":"Snivy","t":"grass"},
+  "872":{"n":"Snom","t":"ice"},
+  "143":{"n":"Snorlax","t":"normal"},
+  "361":{"n":"Snorunt","t":"ice"},
+  "459":{"n":"Snover","t":"grass"},
+  "209":{"n":"Snubbull","t":"fairy"},
+  "816":{"n":"Sobble","t":"water"},
+  "577":{"n":"Solosis","t":"psychic"},
+  "338":{"n":"Solrock","t":"rock"},
+  "21":{"n":"Spearow","t":"normal"},
+  "665":{"n":"Spewpa","t":"bug"},
+  "363":{"n":"Spheal","t":"water"},
+  "918":{"n":"Spidops","t":"bug"},
+  "167":{"n":"Spinarak","t":"bug"},
+  "327":{"n":"Spinda","t":"normal"},
+  "442":{"n":"Spiritomb","t":"ghost"},
+  "325":{"n":"Spoink","t":"psychic"},
+  "906":{"n":"Sprigatito","t":"grass"},
+  "682":{"n":"Spritzee","t":"fairy"},
+  "7":{"n":"Squirtle","t":"water"},
+  "234":{"n":"Stantler","t":"normal"},
+  "398":{"n":"Staraptor","t":"normal"},
+  "397":{"n":"Staravia","t":"normal"},
+  "396":{"n":"Starly","t":"normal"},
+  "121":{"n":"Starmie","t":"water"},
+  "120":{"n":"Staryu","t":"water"},
+  "208":{"n":"Steelix","t":"ground"},
+  "762":{"n":"Steenee","t":"grass"},
+  "874":{"n":"Stonjourner","t":"rock"},
+  "508":{"n":"Stoutland","t":"normal"},
+  "759":{"n":"Stufful","t":"normal"},
+  "618":{"n":"Stunfisk","t":"electric"},
+  "434":{"n":"Stunky","t":"dark"},
+  "185":{"n":"Sudowoodo","t":"rock"},
+  "192":{"n":"Sunflora","t":"grass"},
+  "191":{"n":"Sunkern","t":"grass"},
+  "283":{"n":"Surskit","t":"bug"},
+  "333":{"n":"Swablu","t":"normal"},
+  "541":{"n":"Swadloon","t":"bug"},
+  "317":{"n":"Swalot","t":"poison"},
+  "260":{"n":"Swampert","t":"water"},
+  "581":{"n":"Swanna","t":"water"},
+  "277":{"n":"Swellow","t":"normal"},
+  "220":{"n":"Swinub","t":"ice"},
+  "684":{"n":"Swirlix","t":"fairy"},
+  "528":{"n":"Swoobat","t":"psychic"},
+  "700":{"n":"Sylveon","t":"fairy"},
+  "938":{"n":"Tadbulb","t":"electric"},
+  "276":{"n":"Taillow","t":"normal"},
+  "663":{"n":"Talonflame","t":"fire"},
+  "924":{"n":"Tandemaus","t":"normal"},
+  "114":{"n":"Tangela","t":"grass"},
+  "465":{"n":"Tangrowth","t":"grass"},
+  "978":{"n":"Tatsugiri","t":"water"},
+  "128":{"n":"Tauros","t":"normal"},
+  "216":{"n":"Teddiursa","t":"normal"},
+  "72":{"n":"Tentacool","t":"water"},
+  "73":{"n":"Tentacruel","t":"water"},
+  "498":{"n":"Tepig","t":"fire"},
+  "828":{"n":"Thievul","t":"dark"},
+  "538":{"n":"Throh","t":"fighting"},
+  "811":{"n":"Thwackey","t":"grass"},
+  "532":{"n":"Timburr","t":"fighting"},
+  "957":{"n":"Tinkatink","t":"fairy"},
+  "959":{"n":"Tinkaton","t":"fairy"},
+  "958":{"n":"Tinkatuff","t":"fairy"},
+  "564":{"n":"Tirtouga","t":"water"},
+  "948":{"n":"Toedscool","t":"ground"},
+  "949":{"n":"Toedscruel","t":"ground"},
+  "777":{"n":"Togedemaru","t":"electric"},
+  "468":{"n":"Togekiss","t":"fairy"},
+  "175":{"n":"Togepi","t":"fairy"},
+  "176":{"n":"Togetic","t":"fairy"},
+  "255":{"n":"Torchic","t":"fire"},
+  "324":{"n":"Torkoal","t":"fire"},
+  "726":{"n":"Torracat","t":"fire"},
+  "389":{"n":"Torterra","t":"grass"},
+  "158":{"n":"Totodile","t":"water"},
+  "733":{"n":"Toucannon","t":"normal"},
+  "748":{"n":"Toxapex","t":"poison"},
+  "848":{"n":"Toxel","t":"electric"},
+  "454":{"n":"Toxicroak","t":"poison"},
+  "849":{"n":"Toxtricity","t":"electric"},
+  "520":{"n":"Tranquill","t":"normal"},
+  "328":{"n":"Trapinch","t":"ground"},
+  "252":{"n":"Treecko","t":"grass"},
+  "709":{"n":"Trevenant","t":"ghost"},
+  "357":{"n":"Tropius","t":"grass"},
+  "568":{"n":"Trubbish","t":"poison"},
+  "732":{"n":"Trumbeak","t":"normal"},
+  "763":{"n":"Tsareena","t":"grass"},
+  "776":{"n":"Turtonator","t":"fire"},
+  "387":{"n":"Turtwig","t":"grass"},
+  "535":{"n":"Tympole","t":"water"},
+  "602":{"n":"Tynamo","t":"electric"},
+  "248":{"n":"Tyranitar","t":"dark"},
+  "697":{"n":"Tyrantrum","t":"rock"},
+  "236":{"n":"Tyrogue","t":"fighting"},
+  "696":{"n":"Tyrunt","t":"rock"},
+  "197":{"n":"Umbreon","t":"dark"},
+  "521":{"n":"Unfezant","t":"normal"},
+  "201":{"n":"Unown","t":"psychic"},
+  "217":{"n":"Ursaring","t":"normal"},
+  "583":{"n":"Vanillish","t":"ice"},
+  "582":{"n":"Vanillite","t":"ice"},
+  "584":{"n":"Vanilluxe","t":"ice"},
+  "134":{"n":"Vaporeon","t":"water"},
+  "543":{"n":"Venipede","t":"bug"},
+  "49":{"n":"Venomoth","t":"poison"},
+  "48":{"n":"Venonat","t":"poison"},
+  "3":{"n":"Venusaur","t":"grass"},
+  "329":{"n":"Vibrava","t":"dragon"},
+  "71":{"n":"Victreebel","t":"grass"},
+  "288":{"n":"Vigoroth","t":"normal"},
+  "738":{"n":"Vikavolt","t":"bug"},
+  "45":{"n":"Vileplume","t":"grass"},
+  "313":{"n":"Volbeat","t":"bug"},
+  "637":{"n":"Volcarona","t":"bug"},
+  "100":{"n":"Voltorb","t":"electric"},
+  "629":{"n":"Vullaby","t":"dark"},
+  "37":{"n":"Vulpix","t":"fire"},
+  "320":{"n":"Wailmer","t":"water"},
+  "321":{"n":"Wailord","t":"water"},
+  "365":{"n":"Walrein","t":"water"},
+  "8":{"n":"Wartortle","t":"water"},
+  "505":{"n":"Watchog","t":"normal"},
+  "940":{"n":"Wattrel","t":"electric"},
+  "461":{"n":"Weavile","t":"ice"},
+  "13":{"n":"Weedle","t":"poison"},
+  "70":{"n":"Weepinbell","t":"grass"},
+  "110":{"n":"Weezing","t":"poison"},
+  "547":{"n":"Whimsicott","t":"grass"},
+  "544":{"n":"Whirlipede","t":"bug"},
+  "340":{"n":"Whiscash","t":"water"},
+  "293":{"n":"Whismur","t":"normal"},
+  "40":{"n":"Wigglytuff","t":"normal"},
+  "960":{"n":"Wiglett","t":"water"},
+  "767":{"n":"Wimpod","t":"bug"},
+  "278":{"n":"Wingull","t":"water"},
+  "202":{"n":"Wobbuffet","t":"psychic"},
+  "527":{"n":"Woobat","t":"psychic"},
+  "831":{"n":"Wooloo","t":"normal"},
+  "194":{"n":"Wooper","t":"water"},
+  "413":{"n":"Wormadam","t":"grass"},
+  "265":{"n":"Wurmple","t":"bug"},
+  "360":{"n":"Wynaut","t":"psychic"},
+  "178":{"n":"Xatu","t":"psychic"},
+  "562":{"n":"Yamask","t":"ghost"},
+  "835":{"n":"Yamper","t":"electric"},
+  "193":{"n":"Yanma","t":"bug"},
+  "469":{"n":"Yanmega","t":"bug"},
+  "734":{"n":"Yungoos","t":"normal"},
+  "570":{"n":"Zorua","t":"dark"},
+  "571":{"n":"Zoroark","t":"dark"},
+  "41":{"n":"Zubat","t":"flying"},
+  "634":{"n":"Zweilous","t":"dark"}
+};
+const ALL_IDS='460,63,359,617,142,306,190,65,594,334,698,424,591,181,347,842,840,752,24,930,59,566,567,168,348,936,683,304,144,531,699,713,610,482,184,298,371,343,354,689,339,550,411,153,614,267,15,606,374,939,182,69,712,760,400,399,688,625,9,257,824,242,522,525,836,962,438,626,761,654,628,286,729,437,436,779,406,418,1,427,659,412,12,331,332,323,703,838,455,565,318,268,351,10,251,851,937,975,974,609,113,935,6,737,4,5,441,421,420,652,650,152,390,358,170,433,573,815,366,692,693,344,36,35,173,852,91,839,638,563,415,256,764,534,341,222,823,822,546,739,346,408,342,488,453,169,910,159,558,615,613,104,742,155,927,491,555,723,554,724,702,585,633,301,225,655,386,87,502,751,781,483,719,660,50,132,85,84,929,977,232,825,680,887,148,149,886,780,452,147,885,426,425,529,96,621,832,580,51,206,578,884,632,356,477,355,269,557,603,604,133,23,830,125,466,309,101,239,605,500,587,395,244,589,196,677,530,102,103,295,870,83,22,349,653,160,597,598,926,456,180,669,973,841,136,662,661,419,670,907,671,330,753,590,205,611,592,656,657,478,873,909,676,162,444,475,596,569,445,282,934,92,423,94,74,443,526,999,203,487,471,362,431,207,472,44,673,42,118,55,76,622,768,623,706,704,368,829,574,576,575,711,210,75,971,820,658,88,861,810,388,253,58,736,326,316,533,130,440,297,856,858,857,93,701,612,631,695,694,214,507,449,450,107,106,237,430,679,163,187,116,229,228,972,367,635,97,174,314,859,727,876,392,686,2,782,593,39,385,135,595,189,124,140,141,64,14,115,588,352,941,983,230,99,281,600,950,707,599,601,109,98,401,402,552,553,305,608,171,131,636,246,470,542,915,166,165,463,108,510,345,506,264,667,725,607,271,428,270,294,448,272,457,337,754,370,404,405,68,67,66,240,219,129,126,467,81,82,462,296,687,473,630,310,56,226,458,556,747,179,183,105,259,284,925,303,308,307,154,908,678,52,376,375,11,151,150,619,620,262,350,241,572,312,200,429,391,755,860,877,414,258,89,446,517,198,518,177,827,34,31,29,32,30,33,290,38,291,164,714,715,299,322,274,919,224,43,916,138,139,95,501,417,770,536,674,675,515,511,513,46,47,504,921,922,923,624,279,53,548,231,708,16,17,18,519,499,25,731,221,204,127,393,311,186,60,61,62,77,261,728,137,474,233,57,394,476,54,710,247,509,432,668,195,914,912,913,156,651,211,26,280,409,78,20,19,378,369,223,579,112,111,464,743,447,744,524,837,821,315,407,479,722,627,302,373,757,503,551,27,28,769,539,586,664,254,212,545,813,560,559,123,117,119,364,273,86,537,161,497,496,336,540,319,292,372,90,422,616,410,275,403,285,213,353,561,266,854,850,227,672,188,300,451,435,819,289,287,705,80,199,79,218,685,235,928,238,215,495,872,143,361,459,209,816,577,338,21,665,363,918,167,327,442,325,906,682,7,234,398,397,396,121,120,208,762,874,508,759,618,434,185,192,191,283,333,541,317,260,581,277,220,684,528,700,938,276,663,924,114,465,978,128,216,72,73,498,828,538,811,532,957,959,958,564,948,949,777,468,175,176,255,324,726,389,158,733,748,848,454,849,520,328,252,709,357,568,732,763,776,387,535,602,248,697,236,696,197,521,201,217,583,582,584,134,543,49,48,3,329,71,288,738,45,313,637,100,629,37,320,321,365,8,505,940,461,13,70,110,547,544,340,293,40,960,767,278,202,527,831,194,413,265,360,178,562,835,193,469,734,570,571,41,634';
+const PKMN=Object.entries(POKE_DICT).map(([id,p])=>({id:parseInt(id),name:p.n,type:p.t}));
+
+const RARE_IDS=new Set([94,130,131,132,142,143,147,148,149,196,197,227,229,242,246,247,248,282,302,330,334,350,359,371,372,373,374,375,376,442,443,444,445,448,460,461,468,470,471,475,477,478,610,611,633,636,700,704,705,706,778,782,783,885,886,887,959]);
+const TYPE_COLORS={normal:'#a8a878',fire:'#f08030',water:'#6890f0',electric:'#f8d030',grass:'#78c850',ice:'#98d8d8',fighting:'#c03028',poison:'#a040a0',ground:'#e0c068',flying:'#a890f0',psychic:'#f85888',bug:'#a8b820',rock:'#b8a038',ghost:'#705898',dragon:'#7038f8',dark:'#705848',steel:'#b8b8d0',fairy:'#ee99ac'};
+const ZONES=[
+  {n:'Central Park',lat:40.7829,lng:-73.9654},{n:'Times Square',lat:40.7580,lng:-73.9855},
+  {n:'Bryant Park',lat:40.7536,lng:-73.9832},{n:'Washington Sq',lat:40.7308,lng:-73.9973},
+  {n:'Battery Park',lat:40.7033,lng:-74.0170},{n:'East Village',lat:40.7264,lng:-73.9838},
+  {n:'Upper West Side',lat:40.7870,lng:-73.9754},{n:'Harlem',lat:40.8116,lng:-73.9465},
+  {n:'Prospect Park',lat:40.6602,lng:-73.9690},{n:'Williamsburg',lat:40.7081,lng:-73.9571},
+  {n:'Astoria Park',lat:40.7785,lng:-73.9290},{n:'Flushing',lat:40.7282,lng:-73.8456},
+  {n:'Bronx Zoo',lat:40.8506,lng:-73.8769},{n:'DUMBO',lat:40.7033,lng:-73.9889}
+];
+
+// CP multiplier par level (simplifie) — pour estimer CP quand l'API ne le donne pas
+const CPM = [0,0.094,0.1351374,0.1663979,0.1926509,0.2157325,0.2365727,0.2557201,0.2735304,0.2901239,0.3056,0.3200,0.3337,0.3464,0.3583,0.3696,0.3801,0.3900,0.3993,0.4081,0.4166,0.4246,0.4325,0.4399,0.4472,0.4543,0.4610,0.4675,0.4739,0.4800,0.4860,0.4918,0.4975,0.5030,0.5085,0.5738,0.5765,0.5792,0.5820,0.5848,0.5876,0.5903,0.5931,0.5959,0.5986,0.6014,0.6042,0.6070,0.6098,0.6126,0.6155];
+// Base stats approximatives par species (fallback si on n'a pas les vraies)
+// CP = ((atk+15) * sqrt(def+15) * sqrt(sta+15) * cpm^2) / 10
+function estimateCP(pkId, iv, lvl) {
+  // On utilise l'ID pour avoir une base stats approximative
+  // Valeurs moyennes NYC: lvl 1-40, iv 0-100
+  const l = Math.min(Math.max(lvl||20, 1), 50);
+  const cpm = CPM[Math.min(l, CPM.length-1)] || 0.5;
+  // On ne connait pas les vraies base stats sans table complete
+  // Estimation raisonnable: CP ~ pkId * 0.8 * cpm^2 * (1 + iv/100*0.4)
+  return Math.max(10, Math.round(pkId * 1.5 * (cpm * cpm) * (1 + (iv>=0?iv:50)/100 * 0.4)));
+}
+
+// ── STATE ──────────────────────────────────────────────────────
+let map, allSpawns=[], filtered=[];
+let watchList=[], notifOK=false, alerted=new Set();
+let qf='all', activeTypes=[], ivMin=0, cpMin=0;
+let apiMode='demo', fetching=false, sinceIns=0, sheetOpen=false;
+let mapReady=false;
+
+// ── VIEWPORT CULLING ───────────────────────────────────────────
+// Seuls les marqueurs dans la vue courante sont dans le DOM.
+// Max 300 marqueurs simultanement pour rester fluide.
+const visibleMarkers = new Map(); // uid -> L.marker
+// MAX_VIS adaptatif selon le zoom
+// zoom 16+ : quartier     -> 600 marqueurs
+// zoom 14-15 : arrondissement -> 800
+// zoom 12-13 : NYC entier  -> 1200
+// zoom < 12 : region       -> 600 (moins dense mais large)
+function getMaxVis() {
+  const z = map ? map.getZoom() : 13;
+  if(z >= 16) return 600;
+  if(z >= 14) return 800;
+  if(z >= 12) return 1200;
+  return 600;
+}
+
+function doCull() {
+  if(!mapReady) return;
+  const b = map.getBounds();
+  const sw = b.getSouthWest(), ne = b.getNorthEast();
+  // Buffer de 20% autour de la vue
+  const latBuf = (ne.lat - sw.lat) * 0.2;
+  const lngBuf = (ne.lng - sw.lng) * 0.2;
+  const minLat = sw.lat - latBuf, maxLat = ne.lat + latBuf;
+  const minLng = sw.lng - lngBuf, maxLng = ne.lng + lngBuf;
+
+  const now = Date.now();
+
+  // Candidats: dans filtered, non expires, dans la vue
+  const candidates = filtered.filter(s =>
+    s.expireAt > now &&
+    s.lat >= minLat && s.lat <= maxLat &&
+    s.lng >= minLng && s.lng <= maxLng
+  );
+
+  // Trier par priorite: hundo > watched > rare > IV desc
+  candidates.sort((a,b) => {
+    const pa = (a.isHundo?3:0) + (watchList.some(w=>a.pk.name.toLowerCase().includes(w.toLowerCase()))?2:0) + (RARE_IDS.has(a.pk.id)?1:0);
+    const pb = (b.isHundo?3:0) + (watchList.some(w=>b.pk.name.toLowerCase().includes(w.toLowerCase()))?2:0) + (RARE_IDS.has(b.pk.id)?1:0);
+    if(pb !== pa) return pb - pa;
+    return b.iv - a.iv;
+  });
+
+  const toShow = candidates.slice(0, getMaxVis());
+  const toShowSet = new Set(toShow.map(s => s.uid));
+
+  // Retirer marqueurs hors vue
+  for(const [uid, m] of visibleMarkers) {
+    if(!toShowSet.has(uid)) {
+      map.removeLayer(m);
+      visibleMarkers.delete(uid);
+    }
+  }
+  // Ajouter nouveaux marqueurs
+  for(const s of toShow) {
+    if(!visibleMarkers.has(s.uid)) {
+      const m = makeMarker(s);
+      m.addTo(map);
+      visibleMarkers.set(s.uid, m);
+    }
+  }
+
+  // Chip indicateur
+  const vc = document.getElementById('vis-chip');
+  if(vc) vc.textContent = visibleMarkers.size + ' visibles / ' + filtered.length + ' filtres / ' + allSpawns.filter(s=>s.expireAt>now).length + ' total';
+}
+
+let cullTimer = null;
+function scheduleCull() {
+  if(cullTimer) clearTimeout(cullTimer);
+  cullTimer = setTimeout(doCull, 80); // debounce 80ms
+}
+
+function makeMarker(s) {
+  const w = watchList.some(x => s.pk.name.toLowerCase().includes(x.toLowerCase()));
+  const cls = s.isHundo ? 'hundo' : w ? 'watched' : RARE_IDS.has(s.pk.id) ? 'rare' : '';
+  const icon = L.divIcon({
+    html: '<div class="poke-pin '+cls+'"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy"></div>',
+    className: '', iconSize:[42,42], iconAnchor:[21,21]
+  });
+  const m = L.marker([s.lat, s.lng], {icon});
+  m.on('click', e => { L.DomEvent.stopPropagation(e); openPopup(s); });
+  return m;
+}
+
+function clearAllMarkers() {
+  for(const m of visibleMarkers.values()) map.removeLayer(m);
+  visibleMarkers.clear();
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+window.onload = function() {
+  initMap();
+  buildTypeGrid();
+  loadWatch();
+  checkNotif();
+  checkIOS();
+  spawnLoop();
+  setInterval(tick, 1000);
+  setInterval(function(){ if(apiMode==='real') fetchReal(false); }, 30000);
+};
+
+function initMap() {
+  // PAS de preferCanvas — incompatible avec L.divIcon sur certains navigateurs
+  map = L.map('map', {
+    center:[40.7580,-73.9855], zoom:13,
+    zoomControl:false, attributionControl:false
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {maxZoom:19}).addTo(map);
+  map.on('click', closePopup);
+  map.on('moveend zoomend', scheduleCull);
+  map.whenReady(function() {
+    mapReady = true;
+    scheduleCull();
+  });
+}
+
+function buildTypeGrid() {
+  const g = document.getElementById('type-grid');
+  Object.entries(TYPE_COLORS).forEach(([t,c]) => {
+    const b = document.createElement('div');
+    b.className = 'type-btn'; b.textContent = t;
+    b.style.cssText = 'background:'+c+'22;color:'+c+';border-color:'+c+'33';
+    b.dataset.type = t;
+    b.onclick = () => {
+      b.classList.toggle('active');
+      b.style.borderColor = b.classList.contains('active') ? c : c+'33';
+      if(b.classList.contains('active')){ if(!activeTypes.includes(t)) activeTypes.push(t); }
+      else activeTypes = activeTypes.filter(x => x !== t);
+      applyFilters();
+    };
+    g.appendChild(b);
+  });
+}
+
+function loadWatch() {
+  try { watchList = JSON.parse(localStorage.getItem('pw') || '[]'); } catch(e) { watchList = []; }
+  renderWatch(); updateBadge();
+}
+
+// ── FETCH ──────────────────────────────────────────────────────
+async function spawnLoop() {
+  clearAllMarkers(); allSpawns=[]; sinceIns=0;
+  setChip('Connexion...');
+  await fetchReal(true);
+}
+
+async function fetchReal(first) {
+  if(fetching) return;
+  fetching = true;
+  const url = 'http://localhost:8080/proxy?mons=' + encodeURIComponent(ALL_IDS) + '&time=' + Date.now() + '&since=' + sinceIns;
+  try {
+    const r = await fetch(url, {signal: AbortSignal.timeout(20000)});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data = await r.json();
+    if(!data || !data.pokemons) throw new Error('no data');
+    sinceIns = (data.meta && data.meta.inserted) ? data.meta.inserted : sinceIns;
+    apiMode = 'real';
+    const now = Math.floor(Date.now()/1000);
+    const newOnes = [];
+    data.pokemons.forEach(raw => {
+      if(!raw.pokemon_id || !raw.lat || !raw.lng || raw.despawn < now) return;
+      const uid = raw.pokemon_id+'_'+raw.lat+'_'+raw.lng+'_'+raw.despawn;
+      if(allSpawns.find(s => s.uid===uid)) return;
+      const pk = PKMN.find(p=>p.id===raw.pokemon_id) || {id:raw.pokemon_id, name:'#'+raw.pokemon_id, type:'normal'};
+      // IV: -1 si inconnu
+      const iv = (raw.attack>=0 && raw.defence>=0 && raw.stamina>=0)
+        ? Math.round((raw.attack+raw.defence+raw.stamina)/45*100) : -1;
+      // CP: utilise la valeur API si disponible, sinon estime
+      const lvl = raw.level > 0 ? raw.level : 20;
+      const cp = raw.cp > 0 ? raw.cp : estimateCP(raw.pokemon_id, iv, lvl);
+      const s = {
+        uid, pk, iv, cp, lvl,
+        lat:parseFloat(raw.lat), lng:parseFloat(raw.lng),
+        zone:'NYC', expireAt:raw.despawn*1000,
+        isHundo: raw.attack>=0 && raw.attack+raw.defence+raw.stamina===45,
+        cpEstimated: raw.cp <= 0  // flag pour afficher ~ dans le popup
+      };
+      allSpawns.push(s); newOnes.push(s);
+    });
+    setChip('LIVE - '+allSpawns.length+' spawns');
+    document.getElementById('cnt').textContent = allSpawns.length;
+    applyFilters();
+    checkAlerts(newOnes);
+    if(first) toast(newOnes.length+' Pokemon charges', 'NYCPokeMap - zoom pour voir les marqueurs', null, '#69ff47');
+  } catch(e) {
+    console.warn('fetchReal:', e.message);
+    apiMode = 'demo';
+    setChip('DEMO - Lance server.py');
+    if(allSpawns.length===0) { genDemo(); }
+  }
+  fetching = false;
+}
+
+function setChip(t) { document.getElementById('mode-chip').textContent = t; }
+
+function genDemo() {
+  for(let i=0;i<600;i++){
+    const z=ZONES[Math.floor(Math.random()*ZONES.length)];
+    const pk=PKMN[Math.floor(Math.random()*PKMN.length)];
+    const iv=rollIV(), lvl=5+Math.floor(Math.random()*35);
+    const cp=estimateCP(pk.id, iv, lvl);
+    const s={uid:Math.random().toString(36).slice(2),pk,iv,cp,lvl,
+      lat:z.lat+(Math.random()-.5)*.06, lng:z.lng+(Math.random()-.5)*.06,
+      zone:z.n, expireAt:Date.now()+(5+Math.floor(Math.random()*25))*60000,
+      isHundo:iv===100, cpEstimated:true};
+    allSpawns.push(s);
+  }
+  document.getElementById('cnt').textContent = allSpawns.length;
+  applyFilters(); checkAlerts(allSpawns);
+}
+
+function rollIV(){
+  const r=Math.random();
+  if(r<.008)return 100;
+  if(r<.04)return 90+Math.floor(Math.random()*10);
+  if(r<.18)return 80+Math.floor(Math.random()*10);
+  return Math.floor(Math.random()*80);
+}
+
+// ── POPUP ─────────────────────────────────────────────────────
+function openPopup(s) {
+  const rem=Math.max(0,Math.floor((s.expireAt-Date.now())/60000));
+  const ic=s.iv===100?'iv-100':s.iv>=90?'iv-90':s.iv>=80?'iv-80':'iv-low';
+  const ivStr=s.iv>=0?s.iv+'%':'?';
+  const cpStr=(s.cpEstimated?'~':'')+s.cp;
+  document.getElementById('popup-content').innerHTML=
+    '<div class="popup-head">'+
+    '<img class="popup-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png">'+
+    '<div><div class="popup-name">'+s.pk.name+' <span class="iv-tag '+ic+'">'+ivStr+'</span></div>'+
+    '<div class="popup-sub">#'+String(s.pk.id).padStart(3,'0')+' - '+s.zone+'</div></div></div>'+
+    '<div class="popup-grid">'+
+    '<div class="pstat"><div class="pstat-l">CP</div><div class="pstat-v">'+cpStr+'</div></div>'+
+    '<div class="pstat"><div class="pstat-l">LVL</div><div class="pstat-v">'+(s.lvl>0?s.lvl:'-')+'</div></div>'+
+    '<div class="pstat"><div class="pstat-l">Timer</div><div class="pstat-v" style="color:'+(rem<=3?'#ff4081':'#00e5ff')+'">'+rem+'m</div></div>'+
+    '</div>'+
+    '<div class="popup-coords" id="pc-coord">'+
+    '<div class="coords-txt">GPS: '+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+'</div>'+
+    '<div class="copy-btn">Copier</div></div>'+
+    (s.isHundo?'<div style="text-align:center;font-size:12px;color:var(--gold);margin-bottom:8px">&#128175; 100% IV PARFAIT !</div>':'')+
+    (s.cpEstimated?'<div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:8px">~ CP estime (IV inconnus)</div>':'')+
+    '<div class="popup-btns">'+
+    '<a class="pbtn" href="https://maps.apple.com/?q='+s.lat+','+s.lng+'" target="_blank">Maps</a>'+
+    '<a class="pbtn" href="https://maps.google.com/?q='+s.lat+','+s.lng+'" target="_blank">Google</a>'+
+    '<div class="pbtn primary" id="pc-watch">+ Alerter</div></div>';
+  const coord=s.lat.toFixed(6)+','+s.lng.toFixed(6);
+  document.getElementById('pc-coord').onclick=function(){copyCoords(coord);};
+  document.getElementById('pc-watch').onclick=function(){addToWatch(s.pk.name);};
+  document.getElementById('poke-popup').style.display='block';
+  map.setView([s.lat,s.lng],16,{animate:true,duration:.5});
+}
+function closePopup(){document.getElementById('poke-popup').style.display='none';}
+function copyCoords(c){try{navigator.clipboard.writeText(c);}catch(e){}toast('Coordonnees copiees',c,null,'#00e5ff');}
+
+// ── FILTERS ───────────────────────────────────────────────────
+function applyFilters() {
+  const search=document.getElementById('search-input').value.toLowerCase();
+  const now=Date.now();
+  filtered=allSpawns.filter(s=>{
+    if(s.expireAt<now)return false;
+    if(search&&!s.pk.name.toLowerCase().includes(search))return false;
+    if(ivMin>0&&s.iv>=0&&s.iv<ivMin)return false;
+    if(cpMin>0&&s.cp<cpMin)return false;
+    if(activeTypes.length&&!activeTypes.includes(s.pk.type))return false;
+    if(qf==='hundo'&&!s.isHundo)return false;
+    if(qf==='rare'&&!RARE_IDS.has(s.pk.id))return false;
+    if(qf==='watched'&&!watchList.some(w=>s.pk.name.toLowerCase().includes(w.toLowerCase())))return false;
+    if(qf==='90'&&s.iv<90)return false;
+    if(qf==='expiring'&&(s.expireAt-now)/60000>5)return false;
+    return true;
+  });
+  filtered.sort((a,b)=>b.iv-a.iv);
+  scheduleCull();
+  renderList();
+  document.getElementById('sheet-cnt').textContent=filtered.length;
+}
+
+function setQF(el,key){
+  document.querySelectorAll('#filter-bar .fpill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');qf=key;applyFilters();
+}
+function resetFilters(){
+  document.getElementById('iv-slider').value=0;
+  document.getElementById('cp-slider').value=0;
+  document.getElementById('iv-val').textContent='0%';
+  document.getElementById('cp-val').textContent='0';
+  ivMin=0;cpMin=0;activeTypes=[];
+  document.querySelectorAll('.type-btn.active').forEach(b=>{b.classList.remove('active');b.style.borderColor=TYPE_COLORS[b.dataset.type]+'33';});
+  applyFilters();
+}
+
+function renderList(){
+  const list=document.getElementById('spawn-list');
+  list.innerHTML='';
+  if(!filtered.length){list.innerHTML='<div class="empty"><div class="empty-icon">&#128269;</div><div class="empty-text">Aucun spawn</div></div>';return;}
+  filtered.slice(0,100).forEach(s=>{
+    const rem=Math.max(0,Math.floor((s.expireAt-Date.now())/60000));
+    const ic=s.iv===100?'iv-100':s.iv>=90?'iv-90':s.iv>=80?'iv-80':'iv-low';
+    const ivStr=s.iv>=0?s.iv+'%':'?';
+    const cpStr=(s.cpEstimated?'~':'')+s.cp;
+    const w=watchList.some(x=>s.pk.name.toLowerCase().includes(x.toLowerCase()));
+    const el=document.createElement('div');
+    el.className='sitem'+(s.iv===100?' hundo':'')+(w?' watched':'');
+    el.innerHTML=
+      '<img class="sitem-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy">'+
+      '<div class="sitem-body">'+
+      '<div class="sitem-name">'+s.pk.name+' <span class="iv-tag '+ic+'">'+ivStr+'</span>'+(w?' &#128276;':'')+(RARE_IDS.has(s.pk.id)?' &#11088;':'')+'</div>'+
+      '<div class="sitem-sub">CP '+cpStr+' - Lv'+(s.lvl>0?s.lvl:'?')+' - '+s.zone+'</div></div>'+
+      '<div class="stimer'+(rem<=3?' urgent':'')+'">'+rem+'m</div>';
+    el.onclick=function(){
+      openPopup(s);collapseSheet();
+      map.setView([s.lat,s.lng],Math.max(map.getZoom(),15),{animate:true});
+    };
+    list.appendChild(el);
+  });
+}
+
+// ── SHEET ─────────────────────────────────────────────────────
+function toggleSheet(){sheetOpen=!sheetOpen;document.getElementById('bottom-sheet').classList.toggle('expanded',sheetOpen);}
+function collapseSheet(){sheetOpen=false;document.getElementById('bottom-sheet').classList.remove('expanded');}
+
+// ── WATCHLIST ─────────────────────────────────────────────────
+function openWatch(){document.getElementById('watch-modal').classList.add('open');}
+function closeWatch(){document.getElementById('watch-modal').classList.remove('open');}
+function addWatch(){const inp=document.getElementById('watch-input');const n=inp.value.trim();if(!n)return;if(!watchList.map(w=>w.toLowerCase()).includes(n.toLowerCase())){watchList.push(n);saveWatch();askNotif();}inp.value='';}
+function addToWatch(name){if(!watchList.map(w=>w.toLowerCase()).includes(name.toLowerCase())){watchList.push(name);saveWatch();toast('Alerte ajoutee',name,null,'#ff4081');askNotif();}}
+function removeWatch(name){watchList=watchList.filter(w=>w!==name);saveWatch();}
+function saveWatch(){try{localStorage.setItem('pw',JSON.stringify(watchList));}catch(e){}renderWatch();updateBadge();applyFilters();}
+function renderWatch(){
+  const list=document.getElementById('watch-list');list.innerHTML='';
+  if(!watchList.length){list.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">Ajoute des Pokemon...</div>';return;}
+  watchList.forEach(name=>{
+    const pk=PKMN.find(p=>p.name.toLowerCase()===name.toLowerCase());
+    const row=document.createElement('div');row.className='watch-row';
+    row.innerHTML=(pk?'<img class="watch-row-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+pk.id+'.png">':'<span style="font-size:24px">&#127919;</span>')+
+      '<div class="watch-row-name">'+name+'</div><div class="watch-row-del" id="wd-'+encodeURIComponent(name)+'">&#215;</div>';
+    row.querySelector('#wd-'+encodeURIComponent(name)).onclick=function(){removeWatch(name);};
+    list.appendChild(row);
+  });
+}
+function updateBadge(){const b=document.getElementById('watch-cnt');b.style.display=watchList.length?'flex':'none';b.textContent=watchList.length;}
+function checkAlerts(spawns){
+  if(!spawns)return;
+  spawns.forEach(s=>{
+    if(alerted.has(s.uid))return;
+    if(!watchList.some(w=>s.pk.name.toLowerCase().includes(w.toLowerCase())))return;
+    alerted.add(s.uid);
+    const rem=Math.floor((s.expireAt-Date.now())/60000);
+    toast(s.pk.name+' detecte!',(s.iv>=0?s.iv+'% IV - ':'')+s.zone+' - '+rem+'m',s.pk.id,'#ff4081',function(){openPopup(s);map.setView([s.lat,s.lng],16,{animate:true});});
+    sendNotif(s);
+  });
+}
+
+// ── NOTIFS ────────────────────────────────────────────────────
+function checkNotif(){if(!('Notification' in window))return;const tr=document.getElementById('ntf-track'),sub=document.getElementById('ntf-sub');if(Notification.permission==='granted'){notifOK=true;tr.classList.add('on');sub.textContent='Activees';}else if(Notification.permission==='denied')sub.textContent='Bloquees';else sub.textContent='Tap pour activer';}
+function toggleNotif(){if(!('Notification' in window))return;if(Notification.permission==='granted'){notifOK=!notifOK;document.getElementById('ntf-track').classList.toggle('on',notifOK);document.getElementById('ntf-sub').textContent=notifOK?'Activees':'Desactivees';}else askNotif();}
+function askNotif(){if(!('Notification' in window)||Notification.permission!=='default')return;Notification.requestPermission().then(p=>{notifOK=p==='granted';checkNotif();});}
+function sendNotif(s){if(!notifOK||Notification.permission!=='granted')return;try{new Notification(s.pk.name+(s.iv>=0?' - '+s.iv+'% IV':''),{body:'CP '+(s.cpEstimated?'~':'')+s.cp+' - '+s.zone,icon:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png',tag:s.uid});}catch(e){}}
+
+// ── TICKER ────────────────────────────────────────────────────
+function tick(){
+  const now=Date.now();let exp=0;
+  allSpawns=allSpawns.filter(s=>{
+    if(s.expireAt<now){if(visibleMarkers.has(s.uid)){map.removeLayer(visibleMarkers.get(s.uid));visibleMarkers.delete(s.uid);}exp++;return false;}
+    return true;
+  });
+  if(apiMode==='demo'&&exp>0){
+    const newOnes=[];
+    for(let i=0;i<exp;i++){
+      const z=ZONES[Math.floor(Math.random()*ZONES.length)],pk=PKMN[Math.floor(Math.random()*PKMN.length)];
+      const iv=rollIV(),lvl=5+Math.floor(Math.random()*35);
+      const s={uid:Math.random().toString(36).slice(2),pk,iv,cp:estimateCP(pk.id,iv,lvl),lvl,lat:z.lat+(Math.random()-.5)*.06,lng:z.lng+(Math.random()-.5)*.06,zone:z.n,expireAt:Date.now()+(5+Math.floor(Math.random()*25))*60000,isHundo:iv===100,cpEstimated:true};
+      allSpawns.push(s);newOnes.push(s);
+    }
+    checkAlerts(newOnes);
+  }
+  if(exp>0)applyFilters();
+}
+
+function refresh(){clearAllMarkers();allSpawns=[];filtered=[];alerted.clear();spawnLoop();}
+function openSettings(){document.getElementById('settings-modal').classList.add('open');}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+function centerNYC(){map.setView([40.7580,-73.9855],13,{animate:true});}
+
+function toast(title,detail,pkId,color,onClick){
+  const w=document.getElementById('toast-wrap'),t=document.createElement('div');
+  t.className='toast';t.style.borderColor=color||'var(--red)';
+  t.innerHTML=(pkId?'<img class="toast-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+pkId+'.png">':'')+
+    '<div class="toast-body"><div class="toast-name" style="color:'+(color||'var(--red)')+'">'+title+'</div>'+(detail?'<div class="toast-detail">'+detail+'</div>':'')+'</div>';
+  if(onClick)t.onclick=onClick;
+  w.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>t.remove(),400);},4000);
+}
+function checkIOS(){const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);const sa=navigator.standalone===true||window.matchMedia('(display-mode: standalone)').matches;if(ios&&!sa)setTimeout(()=>document.getElementById('install-banner').classList.add('show'),3000);}
+
+</script>
+</body>
+</html>
