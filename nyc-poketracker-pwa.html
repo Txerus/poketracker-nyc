@@ -15,15 +15,16 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;overflow:hidden;position:fixed;width:100%}
 #app{display:flex;flex-direction:column;height:100%;padding-top:var(--top)}
-#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;background:rgba(10,12,16,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);z-index:200;flex-shrink:0}
-.topbar-left{display:flex;align-items:center;gap:8px}
-.app-title{font-size:20px;font-weight:700;color:white;letter-spacing:-.5px}
-.live-badge{display:flex;align-items:center;gap:4px;padding:2px 7px;background:rgba(105,255,71,.12);border:1px solid rgba(105,255,71,.3);border-radius:20px;font-size:10px;font-weight:600;color:var(--green);letter-spacing:1px}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(10,12,16,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);z-index:200;flex-shrink:0;gap:6px}
+.topbar-left{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.app-title{font-size:18px;font-weight:700;color:white;letter-spacing:-.5px;white-space:nowrap}
+.live-badge{display:flex;align-items:center;gap:4px;padding:2px 7px;background:rgba(105,255,71,.12);border:1px solid rgba(105,255,71,.3);border-radius:20px;font-size:10px;font-weight:600;color:var(--green);letter-spacing:1px;flex-shrink:0}
 .live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 4px var(--green)}50%{opacity:.3;box-shadow:none}}
-.topbar-right{display:flex;gap:8px}
-.icon-btn{width:36px;height:36px;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all .15s;position:relative}
+.topbar-right{display:flex;gap:6px;flex-shrink:0}
+.icon-btn{width:34px;height:34px;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .15s;position:relative;flex-shrink:0}
 .icon-btn:active{transform:scale(.93)}
+.icon-btn.lang-btn{font-size:11px;font-weight:700;color:var(--accent);width:38px}
 .notif-count{position:absolute;top:-4px;right:-4px;background:var(--red);color:white;font-size:9px;font-weight:700;width:14px;height:14px;border-radius:50%;display:none;align-items:center;justify-content:center}
 #main{flex:1;position:relative;overflow:hidden}
 #map{position:absolute;inset:0;z-index:1}
@@ -57,75 +58,99 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .pbtn{flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);text-align:center;text-decoration:none;font-size:13px;font-weight:600;cursor:pointer;display:block}
 .pbtn:active{transform:scale(.96)}
 .pbtn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
-#bottom-sheet{position:absolute;bottom:0;left:0;right:0;z-index:150;background:rgba(10,12,16,.97);border-top:1px solid var(--border);border-radius:20px 20px 0 0;transform:translateY(calc(100% - 100px));transition:transform .35s cubic-bezier(.32,1,.41,1);padding-bottom:var(--safe);max-height:80vh}
+#bottom-sheet{position:absolute;bottom:0;left:0;right:0;z-index:150;background:rgba(10,12,16,.97);border-top:1px solid var(--border);border-radius:20px 20px 0 0;transform:translateY(calc(100% - 100px));transition:transform .35s cubic-bezier(.32,1,.41,1);padding-bottom:var(--safe);max-height:82vh}
 #bottom-sheet.expanded{transform:translateY(0)}
 .sheet-handle-area{padding:12px 0 6px;display:flex;justify-content:center;cursor:pointer}
 .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px}
-.sheet-header{padding:4px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.sheet-header{padding:4px 16px 8px;display:flex;align-items:center;justify-content:space-between}
 .sheet-title{font-size:16px;font-weight:700;color:white}
 .sheet-cnt{font-size:12px;color:var(--muted);background:var(--card);padding:2px 8px;border-radius:20px}
-#filter-bar{padding:0 12px 10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+/* GEN FILTER */
+#gen-bar{padding:0 12px 8px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+#gen-bar::-webkit-scrollbar{display:none}
+.gpill{flex-shrink:0;padding:4px 10px;background:var(--card);border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+.gpill.active{background:rgba(168,85,247,.15);border-color:#a855f7;color:#a855f7}
+/* FILTER BAR */
+#filter-bar{padding:0 12px 8px;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
 #filter-bar::-webkit-scrollbar{display:none}
-.fpill{flex-shrink:0;padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.fpill{flex-shrink:0;padding:5px 12px;background:var(--card);border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
 .fpill.active{background:rgba(0,229,255,.12);border-color:var(--accent);color:var(--accent)}
-#search-row{padding:0 12px 10px;position:relative}
-#search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px 9px 36px;color:var(--text);font-size:14px;outline:none;-webkit-appearance:none}
+#search-row{padding:0 12px 8px;position:relative}
+#search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 14px 8px 34px;color:var(--text);font-size:14px;outline:none;-webkit-appearance:none}
 #search-input:focus{border-color:var(--accent)}
-.search-icon{position:absolute;left:24px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
-#spawn-list{overflow-y:auto;max-height:calc(80vh - 200px);padding:0 12px 16px;-webkit-overflow-scrolling:touch}
+.search-icon{position:absolute;left:22px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+#spawn-list{overflow-y:auto;max-height:calc(82vh - 220px);padding:0 12px 16px;-webkit-overflow-scrolling:touch}
 #spawn-list::-webkit-scrollbar{display:none}
-.sitem{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:6px;cursor:pointer}
+.sitem{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:5px;cursor:pointer}
 .sitem:active{transform:scale(.98)}
 .sitem.hundo{border-color:rgba(255,215,64,.4)}
 .sitem.watched{border-color:rgba(255,64,129,.4)}
-.sitem-img{width:46px;height:46px;object-fit:contain;flex-shrink:0}
+.sitem-img{width:44px;height:44px;object-fit:contain;flex-shrink:0}
 .sitem-body{flex:1;min-width:0}
-.sitem-name{font-size:15px;font-weight:700;color:white;display:flex;align-items:center;gap:6px}
+.sitem-name{font-size:14px;font-weight:700;color:white;display:flex;align-items:center;gap:5px}
 .iv-tag{font-size:10px;padding:1px 5px;border-radius:5px;font-weight:600;font-family:'Courier New',monospace}
 .iv-100{background:rgba(255,215,64,.2);color:var(--gold)}
 .iv-90{background:rgba(105,255,71,.15);color:var(--green)}
 .iv-80{background:rgba(0,229,255,.15);color:var(--accent)}
 .iv-low{background:rgba(255,64,129,.12);color:var(--red)}
-.sitem-sub{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stimer{font-size:13px;font-weight:700;font-family:'Courier New',monospace;color:var(--accent);flex-shrink:0}
+.sitem-sub{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stimer{font-size:12px;font-weight:700;font-family:'Courier New',monospace;color:var(--accent);flex-shrink:0}
 .stimer.urgent{color:var(--red);animation:blink .6s step-end infinite}
 @keyframes blink{50%{opacity:.2}}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:flex-end;justify-content:center;padding-bottom:var(--safe)}
 .modal-overlay.open{display:flex}
-.modal-sheet{background:var(--panel);border-radius:20px 20px 0 0;border:1px solid var(--border);border-bottom:none;width:100%;max-height:80vh;padding:16px;animation:slideUp .3s cubic-bezier(.32,1,.41,1);overflow-y:auto}
+.modal-sheet{background:var(--panel);border-radius:20px 20px 0 0;border:1px solid var(--border);border-bottom:none;width:100%;max-height:85vh;padding:16px;animation:slideUp .3s cubic-bezier(.32,1,.41,1);overflow-y:auto;display:flex;flex-direction:column}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-title{font-size:18px;font-weight:700;color:white;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:18px;font-weight:700;color:white;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .modal-close{width:28px;height:28px;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--muted)}
-.watch-input-row{display:flex;gap:8px;margin-bottom:14px}
-.watch-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-size:15px;outline:none;-webkit-appearance:none}
+/* WATCHLIST */
+.watch-input-row{display:flex;gap:8px;margin-bottom:12px;flex-shrink:0}
+.watch-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px;color:var(--text);font-size:15px;outline:none;-webkit-appearance:none}
 .watch-input:focus{border-color:var(--red)}
-.btn-add{padding:10px 18px;background:var(--red);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
-.watch-row{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:10px 14px;margin-bottom:6px}
+.btn-add{padding:9px 16px;background:var(--red);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
+.watch-row{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:9px 12px;margin-bottom:5px}
 .watch-row-img{width:32px;height:32px;object-fit:contain}
-.watch-row-name{flex:1;font-size:15px;font-weight:600;color:white}
+.watch-row-name{flex:1;font-size:14px;font-weight:600;color:white}
 .watch-row-del{width:24px;height:24px;background:rgba(255,64,129,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--red);font-size:16px}
-.ntf-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:14px;cursor:pointer}
+.ntf-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:12px;padding:11px 14px;margin-bottom:12px;cursor:pointer;flex-shrink:0}
 .ntf-label{font-size:14px;font-weight:600;color:white}
-.ntf-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.ntf-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .toggle-track{width:44px;height:26px;background:var(--border);border-radius:13px;position:relative;flex-shrink:0}
 .toggle-track.on{background:var(--accent)}
 .toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;background:white;border-radius:50%;transition:transform .2s}
 .toggle-track.on .toggle-thumb{transform:translateX(18px)}
-.fsec{margin-bottom:16px}
-.fsec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+/* POKEMON SELECTOR */
+#pksearch{width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px;color:var(--text);font-size:14px;outline:none;-webkit-appearance:none;margin-bottom:10px;flex-shrink:0}
+#pksearch:focus{border-color:var(--accent)}
+#pk-list{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+#pk-list::-webkit-scrollbar{display:none}
+.pk-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;cursor:pointer;transition:background .1s}
+.pk-item:hover{background:var(--card)}
+.pk-item.selected{background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.3);border-radius:12px}
+.pk-item img{width:36px;height:36px;object-fit:contain;flex-shrink:0}
+.pk-item-name{flex:1;font-size:14px;color:var(--text)}
+.pk-item-gen{font-size:10px;color:var(--muted);background:var(--card);padding:1px 6px;border-radius:10px}
+.pk-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
+.pk-item.selected .pk-check{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.pk-actions{display:flex;gap:8px;margin-top:10px;flex-shrink:0}
+/* SETTINGS */
+.fsec{margin-bottom:14px;flex-shrink:0}
+.fsec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
 .slider-row{display:flex;align-items:center;gap:10px}
 .slider-row input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer}
 .slider-val{font-size:14px;font-weight:700;color:var(--accent);font-family:'Courier New',monospace;min-width:42px;text-align:right}
-.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.type-btn{padding:6px 4px;border-radius:8px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1px solid transparent;text-transform:capitalize}
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.type-btn{padding:5px 4px;border-radius:8px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:1px solid transparent;text-transform:capitalize}
 .type-btn.active{border-color:white}
-#toast-wrap{position:fixed;top:calc(var(--top) + 70px);left:0;right:0;z-index:1000;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding:0 12px}
+/* TOAST */
+#toast-wrap{position:fixed;top:calc(var(--top) + 60px);left:0;right:0;z-index:1000;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding:0 12px}
 .toast{background:rgba(22,28,40,.97);border:1px solid var(--red);border-radius:16px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(0,0,0,.5);animation:toastIn .3s cubic-bezier(.32,1,.41,1);pointer-events:all;width:100%;max-width:360px;cursor:pointer}
 @keyframes toastIn{from{transform:translateY(-20px) scale(.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .toast-img{width:40px;height:40px;object-fit:contain;flex-shrink:0}
 .toast-body{flex:1}
 .toast-name{font-size:14px;font-weight:700}
-.toast-detail{font-size:12px;color:var(--muted);margin-top:1px}
+.toast-detail{font-size:11px;color:var(--muted);margin-top:1px}
+.toast-badge{background:var(--red);color:white;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;flex-shrink:0}
 #install-banner{position:fixed;bottom:0;left:0;right:0;z-index:600;background:var(--card);border-top:1px solid var(--border);padding:14px 16px calc(14px + var(--safe));display:none;align-items:center;gap:12px}
 #install-banner.show{display:flex}
 .install-body{flex:1}
@@ -140,11 +165,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 <div id="app">
   <div id="topbar">
     <div class="topbar-left">
-      <div class="app-title">&#128507; PokeTracker NYC</div>
+      <div class="app-title">&#128507; PokéTracker</div>
       <div class="live-badge"><div class="live-dot"></div>LIVE</div>
     </div>
     <div class="topbar-right">
+      <div class="icon-btn lang-btn" id="lang-btn" onclick="toggleLang()">FR</div>
       <div class="icon-btn" onclick="openWatch()">&#128276;<div class="notif-count" id="watch-cnt">0</div></div>
+      <div class="icon-btn" onclick="openPkSelect()" title="Filtrer par Pokémon">&#127919;<div class="notif-count" id="sel-badge" style="background:#a855f7">0</div></div>
       <div class="icon-btn" onclick="openSettings()">&#9881;&#65039;</div>
       <div class="icon-btn" onclick="refresh()">&#8635;</div>
     </div>
@@ -170,9 +197,23 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       <div class="sheet-title">Spawns NYC</div>
       <div class="sheet-cnt" id="sheet-cnt">0</div>
     </div>
+    <!-- GEN FILTER -->
+    <div id="gen-bar">
+      <div class="gpill active" onclick="setGen(this,0)">Tous</div>
+      <div class="gpill" onclick="setGen(this,1)">Gen 1</div>
+      <div class="gpill" onclick="setGen(this,2)">Gen 2</div>
+      <div class="gpill" onclick="setGen(this,3)">Gen 3</div>
+      <div class="gpill" onclick="setGen(this,4)">Gen 4</div>
+      <div class="gpill" onclick="setGen(this,5)">Gen 5</div>
+      <div class="gpill" onclick="setGen(this,6)">Gen 6</div>
+      <div class="gpill" onclick="setGen(this,7)">Gen 7</div>
+      <div class="gpill" onclick="setGen(this,8)">Gen 8</div>
+      <div class="gpill" onclick="setGen(this,9)">Gen 9</div>
+    </div>
+    <!-- IV/TYPE FILTER BAR -->
     <div id="filter-bar">
       <div class="fpill active" onclick="setQF(this,'all')">Tous</div>
-      <div class="fpill" onclick="setQF(this,'hundo')">&#10024; 100% IV</div>
+      <div class="fpill" onclick="setQF(this,'hundo')">&#10024; 100%IV</div>
       <div class="fpill" onclick="setQF(this,'rare')">&#11088; Rares</div>
       <div class="fpill" onclick="setQF(this,'watched')">&#128276; Alertes</div>
       <div class="fpill" onclick="setQF(this,'90')">&#128142; 90%+</div>
@@ -180,40 +221,990 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     </div>
     <div id="search-row">
       <div class="search-icon">&#128269;</div>
-      <input id="search-input" type="search" placeholder="Chercher un Pokemon..." oninput="applyFilters()" autocomplete="off" autocorrect="off" spellcheck="false">
+      <input id="search-input" type="search" placeholder="Chercher (FR ou EN)..." oninput="applyFilters()" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
     <div id="spawn-list"><div class="empty"><div class="empty-icon">&#8635;</div><div class="empty-text">Chargement...</div></div></div>
   </div>
 </div>
 <div id="toast-wrap"></div>
+
+<!-- WATCHLIST MODAL -->
 <div class="modal-overlay" id="watch-modal" onclick="if(event.target===this)closeWatch()">
   <div class="modal-sheet">
     <div class="modal-title">&#128276; Watchlist <div class="modal-close" onclick="closeWatch()">&#10005;</div></div>
     <div class="ntf-row" onclick="toggleNotif()">
-      <div><div class="ntf-label">Notifications push</div><div class="ntf-sub" id="ntf-sub">Tap pour activer</div></div>
+      <div><div class="ntf-label">Notifications groupées</div><div class="ntf-sub" id="ntf-sub">Tap pour activer · regroupées par espèce/2min</div></div>
       <div class="toggle-track" id="ntf-track"><div class="toggle-thumb"></div></div>
     </div>
     <div class="watch-input-row">
-      <input class="watch-input" id="watch-input" type="text" placeholder="Ex: Dragonite, Larvitar..." onkeydown="if(event.key==='Enter')addWatch()">
+      <input class="watch-input" id="watch-input" type="text" placeholder="Nom EN: Dragonite, Larvitar..." onkeydown="if(event.key==='Enter')addWatch()">
       <button class="btn-add" onclick="addWatch()">+ Add</button>
     </div>
-    <div id="watch-list"></div>
+    <div id="watch-list" style="overflow-y:auto;flex:1"></div>
   </div>
 </div>
+
+<!-- POKEMON SELECTOR MODAL -->
+<div class="modal-overlay" id="pksel-modal" onclick="if(event.target===this)closePkSelect()">
+  <div class="modal-sheet">
+    <div class="modal-title">&#127919; Filtrer par Pokémon <div class="modal-close" onclick="closePkSelect()">&#10005;</div></div>
+    <input id="pksearch" type="search" placeholder="Recherche FR ou EN..." oninput="renderPkList(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div id="pk-list"></div>
+    <div class="pk-actions">
+      <div class="pbtn" onclick="clearPkSel()" style="color:var(--red)">&#10005; Tout désélectionner</div>
+      <div class="pbtn primary" onclick="closePkSelect()">Appliquer</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
 <div class="modal-overlay" id="settings-modal" onclick="if(event.target===this)closeSettings()">
   <div class="modal-sheet">
-    <div class="modal-title">&#9881;&#65039; Filtres <div class="modal-close" onclick="closeSettings()">&#10005;</div></div>
+    <div class="modal-title">&#9881;&#65039; Filtres avancés <div class="modal-close" onclick="closeSettings()">&#10005;</div></div>
     <div class="fsec"><div class="fsec-label">IV minimum</div><div class="slider-row"><input type="range" id="iv-slider" min="0" max="100" value="0" step="5" oninput="ivMin=parseInt(this.value);document.getElementById('iv-val').textContent=this.value+'%';applyFilters()"><div class="slider-val" id="iv-val">0%</div></div></div>
     <div class="fsec"><div class="fsec-label">CP minimum</div><div class="slider-row"><input type="range" id="cp-slider" min="0" max="4000" value="0" step="100" oninput="cpMin=parseInt(this.value);document.getElementById('cp-val').textContent=this.value;applyFilters()"><div class="slider-val" id="cp-val">0</div></div></div>
     <div class="fsec"><div class="fsec-label">Type</div><div class="type-grid" id="type-grid"></div></div>
-    <div style="display:flex;gap:8px;margin-top:16px"><div class="pbtn" onclick="resetFilters()">Reset</div><div class="pbtn primary" onclick="closeSettings()">OK</div></div>
+    <div style="display:flex;gap:8px;margin-top:14px"><div class="pbtn" onclick="resetFilters()">Reset</div><div class="pbtn primary" onclick="closeSettings()">OK</div></div>
   </div>
 </div>
+
 <div id="install-banner">
-  <div class="install-body"><div class="install-title">Installer PokeTracker</div><div class="install-sub">Partager &#8594; "Sur l'ecran d'accueil"</div></div>
+  <div class="install-body"><div class="install-title">Installer PokéTracker</div><div class="install-sub">Partager &#8594; "Sur l'écran d'accueil"</div></div>
   <div class="install-close" onclick="document.getElementById('install-banner').classList.remove('show')">&#10005;</div>
 </div>
+
 <script>
+const FR_NAMES = {
+  1:'Bulbizarre',
+  2:'Herbizarre',
+  3:'Florizarre',
+  4:'Salamèche',
+  5:'Reptincel',
+  6:'Dracaufeu',
+  7:'Carapuce',
+  8:'Carabaffe',
+  9:'Tortank',
+  10:'Chenipan',
+  11:'Chrysacier',
+  12:'Papilusion',
+  13:'Aspicot',
+  14:'Coconfort',
+  15:'Dardargnan',
+  16:'Roucool',
+  17:'Roucoups',
+  18:'Roucarnage',
+  19:'Rattata',
+  20:'Rattatac',
+  21:'Piafabec',
+  22:'Rapasdepic',
+  23:'Abo',
+  24:'Arbok',
+  25:'Pikachu',
+  26:'Raichu',
+  27:'Sabelette',
+  28:'Sablaireau',
+  29:'Nidoran♀',
+  30:'Nidorina',
+  31:'Nidoqueen',
+  32:'Nidoran♂',
+  33:'Nidorino',
+  34:'Nidoking',
+  35:'Mélofée',
+  36:'Mélodelfe',
+  37:'Goupix',
+  38:'Feunard',
+  39:'Rondoudou',
+  40:'Grodoudou',
+  41:'Nosferapti',
+  42:'Nosferaptus',
+  43:'Mystherbe',
+  44:'Ortide',
+  45:'Rafflesia',
+  46:'Paras',
+  47:'Parasect',
+  48:'Mimitoss',
+  49:'Aéromite',
+  50:'Taupiqueur',
+  51:'Triopikeur',
+  52:'Miaouss',
+  53:'Persian',
+  54:'Psykokwak',
+  55:'Akwakwak',
+  56:'Férosinge',
+  57:'Colossinge',
+  58:'Caninos',
+  59:'Arcanin',
+  60:'Ptitard',
+  61:'Têtarte',
+  62:'Tartard',
+  63:'Abra',
+  64:'Kadabra',
+  65:'Alakazam',
+  66:'Machoc',
+  67:'Machopeur',
+  68:'Mackogneur',
+  69:'Chetiflor',
+  70:'Boustiflor',
+  71:'Empiflor',
+  72:'Tentacool',
+  73:'Tentacruel',
+  74:'Racaillou',
+  75:'Gravalanch',
+  76:'Golem',
+  77:'Ponyta',
+  78:'Galopa',
+  79:'Ramoloss',
+  80:'Flagadoss',
+  81:'Magnéti',
+  82:'Magnéton',
+  83:'Canarticho',
+  84:'Doduo',
+  85:'Dodrio',
+  86:'Otaria',
+  87:'Lamantine',
+  88:'Tadmorv',
+  89:'Grotadmorv',
+  90:'Kokiyas',
+  91:'Crustabri',
+  92:'Fantominus',
+  93:'Spectrum',
+  94:'Ectoplasma',
+  95:'Onix',
+  96:'Soporifik',
+  97:'Hypnomade',
+  98:'Krabby',
+  99:'Krabboss',
+  100:'Voltorbe',
+  101:'Électrode',
+  102:'Nœunœuf',
+  103:'Excelangue',
+  104:'Osselait',
+  105:'Ossatueur',
+  106:'Kicklee',
+  107:'Tygnon',
+  108:'Lippoutou',
+  109:'Smogo',
+  110:'Smogogo',
+  111:'Rhinocorne',
+  112:'Rhinoféros',
+  113:'Leveinard',
+  114:'Saquedeneu',
+  115:'Kangourex',
+  116:'Hypotrempe',
+  117:'Hypocéan',
+  118:'Poissirène',
+  119:'Poissoroy',
+  120:'Stari',
+  121:'Staross',
+  122:'M. Mime',
+  123:'Insécateur',
+  124:'Lippoutou',
+  125:'Élektek',
+  126:'Magmar',
+  127:'Scarabrute',
+  128:'Tauros',
+  129:'Magicarpe',
+  130:'Léviator',
+  131:'Lokhlass',
+  132:'Métamorph',
+  133:'Évoli',
+  134:'Aquali',
+  135:'Voltali',
+  136:'Pyroli',
+  137:'Porygon',
+  138:'Amonita',
+  139:'Amonistar',
+  140:'Kabuto',
+  141:'Kabutops',
+  142:'Ptéra',
+  143:'Ronflex',
+  144:'Artikodin',
+  145:'Électhor',
+  146:'Sulfura',
+  147:'Minidraco',
+  148:'Draco',
+  149:'Dracolosse',
+  150:'Mewtwo',
+  151:'Mew',
+  152:'Germignon',
+  153:'Macronium',
+  154:'Méganium',
+  155:'Héricendre',
+  156:'Feurisson',
+  157:'Typhlosion',
+  158:'Kaiminus',
+  159:'Crocrodil',
+  160:'Aligatueur',
+  161:'Fouinette',
+  162:'Fouinar',
+  163:'Hoothoot',
+  164:'Noarfang',
+  165:'Luçaillon',
+  166:'Coxy',
+  167:'Fygaïon',
+  168:'Arakdo',
+  169:'Nostenfer',
+  170:'Loupio',
+  171:'Lanturn',
+  172:'Pichu',
+  173:'Mélo',
+  174:'Toudoudou',
+  175:'Togepi',
+  176:'Togetic',
+  177:'Natu',
+  178:'Xatu',
+  179:'Wattouat',
+  180:'Lainergie',
+  181:'Pharamp',
+  182:'Joliflor',
+  183:'Marill',
+  184:'Azumarill',
+  185:'Simularbre',
+  186:'Tarpaud',
+  187:'Granivol',
+  188:'Floravol',
+  189:'Cotovol',
+  190:'Capumain',
+  191:'Tournegrin',
+  192:'Héliatronc',
+  193:'Yanma',
+  194:'Axoloto',
+  195:'Maraiste',
+  196:'Mentali',
+  197:'Noctali',
+  198:'Cornèbre',
+  199:'Roigada',
+  200:'Feuforêve',
+  201:'Zarbi',
+  202:'Qulbutoké',
+  203:'Girafarig',
+  204:'Pomdepik',
+  205:'Foretress',
+  206:'Trompignon',
+  207:'Scorplane',
+  208:'Steelix',
+  209:'Snubbull',
+  210:'Granbull',
+  211:'Qwilfish',
+  212:'Cizayox',
+  213:'Caratroc',
+  214:'Scarhino',
+  215:'Farfuret',
+  216:'Teddiursa',
+  217:'Ursaring',
+  218:'Limagma',
+  219:'Volcaropod',
+  220:'Marcacrin',
+  221:'Cochignon',
+  222:'Corayon',
+  223:'Rémoraid',
+  224:'Octillery',
+  225:'Cadoizo',
+  226:'Démanta',
+  227:'Airmure',
+  228:'Malosse',
+  229:'Démolosse',
+  230:'Hyporoi',
+  231:'Phanpy',
+  232:'Donphan',
+  233:'Porygon2',
+  234:'Cerfrousse',
+  235:'Queulorior',
+  236:'Élekid',
+  237:'Tyrgnon',
+  238:'Smoochum',
+  239:'Magby',
+  240:'Magby',
+  241:'Écrémeuh',
+  242:'Leuphorie',
+  243:'Raikou',
+  244:'Entei',
+  245:'Suicune',
+  246:'Embrylex',
+  247:'Évimère',
+  248:'Tyranocif',
+  249:'Lugia',
+  250:'Ho-Oh',
+  251:'Celebi',
+  252:'Arcko',
+  253:'Massko',
+  254:'Jungko',
+  255:'Poussifeu',
+  256:'Galifeu',
+  257:'Braségali',
+  258:'Gobou',
+  259:'Flobio',
+  260:'Laggron',
+  261:'Zigzaton',
+  262:'Mangriff',
+  263:'Zigzaton',
+  264:'Linéon',
+  265:'Cheniti',
+  266:'Cocon',
+  267:'Charmillon',
+  268:'Cocon',
+  269:'Papinox',
+  270:'Nénupiot',
+  271:'Lombre',
+  272:'Ludicolo',
+  273:'Grainipiot',
+  274:'Pifeuille',
+  275:'Tengalice',
+  276:'Nirondelle',
+  277:'Vigoroth',
+  278:'Goélise',
+  279:'Pelikass',
+  280:'Tarsal',
+  281:'Kirlia',
+  282:'Gardevoir',
+  283:'Arakdo',
+  284:'Maskadra',
+  285:'Balignon',
+  286:'Chapignon',
+  287:'Parecool',
+  288:'Vigoroth',
+  289:'Déflaisan',
+  290:'Ningale',
+  291:'Ninja',
+  292:'Yanmask',
+  293:'Chuchmur',
+  294:'Brûlotin',
+  295:'Pétarou',
+  296:'Makuhita',
+  297:'Hariyama',
+  298:'Azurill',
+  299:'Tarinor',
+  300:'Skitty',
+  301:'Delcatty',
+  302:'Mysdibule',
+  303:'Mysdibule',
+  304:'Aeron',
+  305:'Laeron',
+  306:'Galeking',
+  307:'Méditikka',
+  308:'Charmina',
+  309:'Dynavolt',
+  310:'Élecsprint',
+  311:'Posipi',
+  312:'Négapi',
+  313:'Luciole',
+  314:'Volémisse',
+  315:'Rosélia',
+  316:'Gloupti',
+  317:'Avaltout',
+  318:'Carvanha',
+  319:'Sharpedo',
+  320:'Wailmer',
+  321:'Wailord',
+  322:'Chamallot',
+  323:'Camérupt',
+  324:'Chartor',
+  325:'Spoink',
+  326:'Groret',
+  327:'Spinda',
+  328:'Kraknoix',
+  329:'Vibraninf',
+  330:'Libégon',
+  331:'Cacnea',
+  332:'Cacturne',
+  333:'Tylton',
+  334:'Altaria',
+  335:'Zangoose',
+  336:'Séviper',
+  337:'Lunatik',
+  338:'Solrock',
+  339:'Barbicha',
+  340:'Barbicha',
+  341:'Écrapince',
+  342:'Sablaireau',
+  343:'Balbuto',
+  344:'Kaorine',
+  345:'Lilia',
+  346:'Bélombre',
+  347:'Anorith',
+  348:'Armaldo',
+  349:'Barpau',
+  350:'Milobellus',
+  351:'Morphéo',
+  352:'Caméléos',
+  353:'Polichombr',
+  354:'Branette',
+  355:'Ossatueur',
+  356:'Skelénox',
+  357:'Tropius',
+  358:'Chuchmur',
+  359:'Absol',
+  360:'Wynébé',
+  361:'Stalgamin',
+  362:'Oniglali',
+  363:'Obalie',
+  364:'Obalie',
+  365:'Phogleur',
+  366:'Coquiperl',
+  367:'Chassurin',
+  368:'Goréplat',
+  369:'Relicanth',
+  370:'Lovdisc',
+  371:'Draby',
+  372:'Drakite',
+  373:'Drattak',
+  374:'Terhal',
+  375:'Métang',
+  376:'Métalosse',
+  377:'Regirock',
+  378:'Regice',
+  379:'Registeel',
+  380:'Latias',
+  381:'Latios',
+  382:'Kyogre',
+  383:'Groudon',
+  384:'Rayquaza',
+  385:'Jirachi',
+  386:'Deoxys',
+  387:'Tortipouss',
+  388:'Boskara',
+  389:'Torterra',
+  390:'Ouisticram',
+  391:'Chimpenfeu',
+  392:'Simiabraz',
+  393:'Tiplouf',
+  394:'Prinplouf',
+  395:'Pingoléon',
+  396:'Étourmi',
+  397:'Étourvol',
+  398:'Étouraptor',
+  399:'Keunotor',
+  400:'Castorno',
+  401:'Crikzik',
+  402:'Crikeline',
+  403:'Lixy',
+  404:'Luxio',
+  405:'Luxray',
+  406:'Rosélia',
+  407:'Roserade',
+  408:'Kranidos',
+  409:'Rampard',
+  410:'Shelinwx',
+  411:'Bastiodon',
+  412:'Cheniti',
+  413:'Wormadam',
+  414:'Papilord',
+  415:'Apitrini',
+  416:'Apireine',
+  417:'Pachirisu',
+  418:'Balbuto',
+  419:'Morfou',
+  420:'Ceriz',
+  421:'Ceriflor',
+  422:'Sancoki',
+  423:'Tritosor',
+  424:'Amoret',
+  425:'Baudrive',
+  426:'Driftloon',
+  427:'Laporeille',
+  428:'Lockpin',
+  429:'Mistigrix',
+  430:'Corboss',
+  431:'Chaglam',
+  432:'Chaglam',
+  433:'Cascoon',
+  434:'Moufouine',
+  435:'Moufflair',
+  436:'Archéomire',
+  437:'Archédonis',
+  438:'Bonsly',
+  439:'Mime Jr.',
+  440:'Ptiravi',
+  441:'Pipotch',
+  442:'Spiritomb',
+  443:'Denticreux',
+  444:'Dracolosse',
+  445:'Carchacrok',
+  446:'Goinfrex',
+  447:'Riolu',
+  448:'Lucario',
+  449:'Hippopotas',
+  450:'Hippodocus',
+  451:'Scorpi',
+  452:'Drascore',
+  453:'Croâporal',
+  454:'Décibel',
+  455:'Capidextre',
+  456:'Lumineon',
+  457:'Noctullin',
+  458:'Babimanta',
+  459:'Blizzi',
+  460:'Blizzaroi',
+  461:'Manyula',
+  462:'Magnézone',
+  463:'Léctichat',
+  464:'Rhinastoc',
+  465:'Tortitrog',
+  466:'Élekable',
+  467:'Maganon',
+  468:'Togekiss',
+  469:'Yanmega',
+  470:'Phyllali',
+  471:'Givrali',
+  472:'Scorvol',
+  473:'Mammochon',
+  474:'Porygon-Z',
+  475:'Gallame',
+  476:'Tarinorme',
+  477:'Dusknoir',
+  478:'Momartik',
+  479:'Motisma',
+  480:'Uxie',
+  481:'Mesprit',
+  482:'Azelf',
+  483:'Dialga',
+  484:'Palkia',
+  485:'Heatran',
+  486:'Regigigas',
+  487:'Giratina',
+  488:'Cresselia',
+  489:'Phionie',
+  490:'Manaphy',
+  491:'Darkrai',
+  492:'Shaymin',
+  493:'Arceus',
+  494:'Victini',
+  495:'Vipélierre',
+  496:'Lianaja',
+  497:'Majaspic',
+  498:'Gruikui',
+  499:'Chalchien',
+  500:'Flambosson',
+  501:'Moustillon',
+  502:'Manternel',
+  503:'Clamiral',
+  504:'Ratentif',
+  505:'Noctournal',
+  506:'Canihaut',
+  507:'Barfiy',
+  508:'Stoutland',
+  509:'Poilorison',
+  510:'Léopardus',
+  511:'Feuillajou',
+  512:'Herbe-Singe',
+  513:'Flamajou',
+  514:'Feu-Singe',
+  515:'Aquajou',
+  516:'Eau-Singe',
+  517:'Soporifik',
+  518:'Mushana',
+  519:'Poichigeon',
+  520:'Colombeau',
+  521:'Déflaisan',
+  522:'Zébibron',
+  523:'Zéblitz',
+  524:'Binibon',
+  525:'Géolithe',
+  526:'Gigalithe',
+  527:'Chovsourir',
+  528:'Swoobat',
+  529:'Taupéka',
+  530:'Minotaupe',
+  531:'Nanméouïe',
+  532:'Manceau',
+  533:'Betofour',
+  534:'Bétochef',
+  535:'Crapotromp',
+  536:'Crapaud',
+  537:'Grodoudou',
+  538:'Judokrak',
+  539:'Karaclée',
+  540:'Nidovert',
+  541:'Coléodrome',
+  542:'Papylord',
+  543:'Venipède',
+  544:'Scobolide',
+  545:'Scobolux',
+  546:'Cottonee',
+  547:'Whimsicott',
+  548:'Pétale',
+  549:'Fragilady',
+  550:'Bargantua',
+  551:'Krokoroku',
+  552:'Krokorien',
+  553:'Krookodil',
+  554:'Darumarond',
+  555:'Darmanitan',
+  556:'Maracachi',
+  557:'Crabrawler',
+  558:'Crabaraque',
+  559:'Scalpion',
+  560:'Scalproie',
+  561:'Sigilyph',
+  562:'Tutafeh',
+  563:'Tutankafer',
+  564:'Couaneton',
+  565:'Carapagos',
+  566:'Archéodong',
+  567:'Aéroptéryx',
+  568:'Zumeldor',
+  569:'Miasmax',
+  570:'Zorua',
+  571:'Zoroark',
+  572:'Minccino',
+  573:'Cinccino',
+  574:'Gothita',
+  575:'Scalproie',
+  576:'Gothitelle',
+  577:'Solosis',
+  578:'Doublimax',
+  579:'Réuniclus',
+  580:'Couaneton',
+  581:'Lakmécygne',
+  582:'Cryo',
+  583:'Frospie',
+  584:'Givrali',
+  585:'Vivaldaim',
+  586:'Vivaldaim',
+  587:'Emolga',
+  588:'Escargaume',
+  589:'Lançargot',
+  590:'Trompignon',
+  591:'Amoongus',
+  592:'Phancétozar',
+  593:'Poissonpêche',
+  594:'Alomomola',
+  595:'Joltik',
+  596:'Mygavolt',
+  597:'Siderella',
+  598:'Miasmax',
+  599:'Ferrodur',
+  600:'Fermicula',
+  601:'Ferrothorn',
+  602:'Eprouvette',
+  603:'Anchwatt',
+  604:'Trioxhydre',
+  605:'Voyons',
+  606:'Méditikka',
+  607:'Luciole',
+  608:'Luminéon',
+  609:'Lunala',
+  610:'Coupenotte',
+  611:'Incisache',
+  612:'Tranchodon',
+  613:'Grumanimé',
+  614:'Goopet',
+  615:'Soltres',
+  616:'Mollusque',
+  617:'Lançargot',
+  618:'Limonde',
+  619:'Trépassin',
+  620:'Trépassage',
+  621:'Draknoix',
+  622:'Piclairon',
+  623:'Golemastoc',
+  624:'Pawniard',
+  625:'Roibayard',
+  626:'Buffolant',
+  627:'Fauconnier',
+  628:'Gueriaigle',
+  629:'Vostourno',
+  630:'Vaututrice',
+  631:'Pyronille',
+  632:'Limaspeed',
+  633:'Deino',
+  634:'Zweilous',
+  635:'Trioxhydre',
+  636:'Pyronille',
+  637:'Pyrax',
+  638:'Cobaltium',
+  639:'Terrakium',
+  640:'Viridium',
+  641:'Tourbillon',
+  642:'Boréas',
+  643:'Reshiram',
+  644:'Zekrom',
+  645:'Landorus',
+  646:'Kyurem',
+  647:'Keldeo',
+  648:'Mélodie',
+  649:'Genesect',
+  650:'Marisson',
+  651:'Mériaille',
+  652:'Blindépique',
+  653:'Feunnec',
+  654:'Roussil',
+  655:'Goupelin',
+  656:'Froaki',
+  657:'Croâporal',
+  658:'Amphinobi',
+  659:'Sapereau',
+  660:'Excavarête',
+  661:'Pitiétou',
+  662:'Branette',
+  663:'Flambusard',
+  664:'Lépidonille',
+  665:'Chrysacier',
+  666:'Prismillon',
+  667:'Hélionceau',
+  668:'Hélionceau',
+  669:'Flabébé',
+  670:'Floette',
+  671:'Florges',
+  672:'Cabriolaine',
+  673:'Kadorable',
+  674:'Pancham',
+  675:'Pandarbare',
+  676:'Couafarel',
+  677:'Espurr',
+  678:'Méowstic',
+  679:'Escavalier',
+  680:'Doublade',
+  681:'Aegislash',
+  682:'Sucroquin',
+  683:'Aromatisse',
+  684:'Sucroquin',
+  685:'Slurpuff',
+  686:'Gripsou',
+  687:'Sombrimbal',
+  688:'Binacle',
+  689:'Barbaracier',
+  690:'Skrelp',
+  691:'Dragalgue',
+  692:'Clenchi',
+  693:'Clenacier',
+  694:'Borborogor',
+  695:'Élézard',
+  696:'Mâchouard',
+  697:'Tétanidor',
+  698:'Amagara',
+  699:'Dragadoss',
+  700:'Sylveon',
+  701:'Brutalibré',
+  702:'Dedenne',
+  703:'Mineroc',
+  704:'Mucuscule',
+  705:'Muplodocus',
+  706:'Rexillius',
+  707:'Troclé',
+  708:'Brocélome',
+  709:'Trevenant',
+  710:'Pitrouille',
+  711:'Banshitrouye',
+  712:'Snover',
+  713:'Avalugg',
+  714:'Noibat',
+  715:'Noivern',
+  716:'Xerneas',
+  717:'Yveltal',
+  718:'Zygarde',
+  719:'Diancie',
+  720:'Hoopa',
+  721:'Volcanion',
+  722:'Brindibou',
+  723:'Efflèche',
+  724:'Archédonis',
+  725:'Flamiaou',
+  726:'Groinse',
+  727:'Félinferno',
+  728:'Otaquin',
+  729:'Otarlette',
+  730:'Oratoria',
+  731:'Picassaut',
+  732:'Trombising',
+  733:'Toucanol',
+  734:'Gorythmic',
+  735:'Gueriaigle',
+  736:'Larvadar',
+  737:'Électromite',
+  738:'Vikavolt',
+  739:'Crabrawler',
+  740:'Crabominable',
+  741:'Plumeline',
+  742:'Mimicutie',
+  743:'Rubombelle',
+  744:'Rocabot',
+  745:'Lougaroc',
+  746:'Froussardine',
+  747:'Vorastérie',
+  748:'Topidemonde',
+  749:'Oursifeu',
+  750:'Oursalerte',
+  751:'Arachnovel',
+  752:'Solaroc',
+  753:'Fomantis',
+  754:'Lurantis',
+  755:'Morelull',
+  756:'Shiinotic',
+  757:'Salandit',
+  758:'Salazzle',
+  759:'Nounours',
+  760:'Béwear',
+  761:'Bonbeurre',
+  762:'Candine',
+  763:'Tsamanta',
+  764:'Guérilande',
+  765:'Malamandre',
+  766:'Pashmilla',
+  767:'Sovkipou',
+  768:'Golisopod',
+  769:'Sablaireau',
+  770:'Paléossable',
+  771:'Mouscoto',
+  772:'Phirmament',
+  773:'Silvallié',
+  774:'Minior',
+  775:'Leuphorie',
+  776:'Torkaol',
+  777:'Togedemaru',
+  778:'Mimiqui',
+  779:'Bruxish',
+  780:'Drampa',
+  781:'Dhelmise',
+  782:'Jangmo-o',
+  783:'Hakamo-o',
+  784:'Kommo-o',
+  785:'Toucan Tapu',
+  786:'Lele Tapu',
+  787:'Bulu Tapu',
+  788:'Fini Tapu',
+  789:'Cosmog',
+  790:'Cosmovum',
+  791:'Solgaleo',
+  792:'Lunala',
+  793:'Nihilego',
+  794:'Buzzwole',
+  795:'Pheromosa',
+  796:'Xurkitree',
+  797:'Kartana',
+  798:'Guzzlord',
+  799:'Necrozma',
+  800:'Magearna',
+  801:'Marshadow',
+  802:'Poipole',
+  803:'Naganadel',
+  804:'Stakataka',
+  805:'Blacephalon',
+  806:'Zeraora',
+  810:'Ouistempo',
+  811:'Badabing',
+  812:'Gorythmic',
+  813:'Scorbunny',
+  814:'Rapi',
+  815:'Lapyrus',
+  816:'Larméléon',
+  817:'Lézarfus',
+  818:'Larméléon',
+  819:'Grognard',
+  820:'Rongourmand',
+  821:'Cornebre',
+  822:'Rappel',
+  823:'Corvaillus',
+  824:'Insécateur',
+  825:'Scobolide',
+  826:'Scobolux',
+  827:'Nickit',
+  828:'Renard',
+  829:'Cotovol',
+  830:'Tournicoton',
+  831:'Lainergie',
+  832:'Doublégenou',
+  833:'Crabrawler',
+  834:'Crabaraque',
+  835:'Pikachu',
+  836:'Boltund',
+  837:'Rolycoly',
+  838:'Carkol',
+  839:'Coalossal',
+  840:'Applin',
+  841:'Flapple',
+  842:'Appletun',
+  843:'Silicosange',
+  844:'Sarkany',
+  848:'Toxel',
+  849:'Toxtricity',
+  850:'Sizzlipede',
+  851:'Centiskorch',
+  852:'Clobber',
+  853:'Grapploct',
+  854:'Sinistea',
+  855:'Polteageist',
+  856:'Hatenna',
+  857:'Hattrem',
+  858:'Hatterene',
+  859:'Impidimp',
+  860:'Morgrem',
+  861:'Grimmsnarl',
+  862:'Obstagoon',
+  863:'Perrserker',
+  864:'Cursola',
+  865:'Sirfetch\'d',
+  866:'Mr. Rime',
+  867:'Runerigus',
+  868:'Milcery',
+  869:'Alcremie',
+  870:'Falinks',
+  871:'Pincurchin',
+  872:'Snom',
+  873:'Frosmoth',
+  874:'Stonjourner',
+  875:'Éiskern',
+  876:'Indeedee',
+  877:'Morpeko',
+  878:'Cufant',
+  879:'Copperajah',
+  880:'Dracozolt',
+  881:'Arctozolt',
+  882:'Dracovish',
+  883:'Arctovish',
+  884:'Duraludon',
+  885:'Dreepy',
+  886:'Drakloak',
+  887:'Dragapult',
+  906:'Sprigatito',
+  907:'Floragato',
+  908:'Meowscarada',
+  909:'Fuecoco',
+  910:'Crocalor',
+  911:'Skeledirge',
+  912:'Quaxly',
+  913:'Quaxwell',
+  914:'Quaquaval',
+  915:'Lechonk',
+  916:'Oinkologne',
+  918:'Tarountula',
+  919:'Spidops',
+  921:'Pawmi',
+  922:'Pawmo',
+  923:'Pawmot',
+  924:'Tandemaus',
+  925:'Maushold',
+  926:'Fidough',
+  927:'Dachsbun',
+  928:'Smoliv',
+  929:'Dolliv',
+  930:'Arboliva',
+  934:'Garganacl',
+  935:'Charcadet',
+  936:'Armarouge',
+  937:'Ceruledge',
+  938:'Tadbulb',
+  939:'Bellibolt',
+  940:'Wattrel',
+  941:'Kilowattrel',
+  948:'Toedscool',
+  949:'Toedscruel',
+  950:'Klawf',
+  957:'Tinkatink',
+  958:'Tinkatuff',
+  959:'Tinkaton',
+  960:'Wiglett',
+  962:'Bombirdier',
+  971:'Greavard',
+  972:'Houndstone',
+  973:'Flamigo',
+  974:'Cetoddle',
+  975:'Cetitan',
+  977:'Dondozo',
+  978:'Tatsugiri',
+  983:'Kingambit',
+  999:'Gimmighoul'
+};
 const POKE_DICT = {
   "460":{"n":"Abomasnow","t":"grass"},
   "63":{"n":"Abra","t":"psychic"},
@@ -1025,283 +2016,183 @@ const PKMN=Object.entries(POKE_DICT).map(([id,p])=>({id:parseInt(id),name:p.n,ty
 
 const RARE_IDS=new Set([94,130,131,132,142,143,147,148,149,196,197,227,229,242,246,247,248,282,302,330,334,350,359,371,372,373,374,375,376,442,443,444,445,448,460,461,468,470,471,475,477,478,610,611,633,636,700,704,705,706,778,782,783,885,886,887,959]);
 const TYPE_COLORS={normal:'#a8a878',fire:'#f08030',water:'#6890f0',electric:'#f8d030',grass:'#78c850',ice:'#98d8d8',fighting:'#c03028',poison:'#a040a0',ground:'#e0c068',flying:'#a890f0',psychic:'#f85888',bug:'#a8b820',rock:'#b8a038',ghost:'#705898',dragon:'#7038f8',dark:'#705848',steel:'#b8b8d0',fairy:'#ee99ac'};
-const ZONES=[
-  {n:'Central Park',lat:40.7829,lng:-73.9654},{n:'Times Square',lat:40.7580,lng:-73.9855},
-  {n:'Bryant Park',lat:40.7536,lng:-73.9832},{n:'Washington Sq',lat:40.7308,lng:-73.9973},
-  {n:'Battery Park',lat:40.7033,lng:-74.0170},{n:'East Village',lat:40.7264,lng:-73.9838},
-  {n:'Upper West Side',lat:40.7870,lng:-73.9754},{n:'Harlem',lat:40.8116,lng:-73.9465},
-  {n:'Prospect Park',lat:40.6602,lng:-73.9690},{n:'Williamsburg',lat:40.7081,lng:-73.9571},
-  {n:'Astoria Park',lat:40.7785,lng:-73.9290},{n:'Flushing',lat:40.7282,lng:-73.8456},
-  {n:'Bronx Zoo',lat:40.8506,lng:-73.8769},{n:'DUMBO',lat:40.7033,lng:-73.9889}
-];
+const ZONES=[{n:'Central Park',lat:40.7829,lng:-73.9654},{n:'Times Square',lat:40.7580,lng:-73.9855},{n:'Bryant Park',lat:40.7536,lng:-73.9832},{n:'Washington Sq',lat:40.7308,lng:-73.9973},{n:'Battery Park',lat:40.7033,lng:-74.0170},{n:'East Village',lat:40.7264,lng:-73.9838},{n:'Upper West Side',lat:40.7870,lng:-73.9754},{n:'Harlem',lat:40.8116,lng:-73.9465},{n:'Prospect Park',lat:40.6602,lng:-73.9690},{n:'Williamsburg',lat:40.7081,lng:-73.9571},{n:'Astoria Park',lat:40.7785,lng:-73.9290},{n:'Flushing',lat:40.7282,lng:-73.8456},{n:'Bronx Zoo',lat:40.8506,lng:-73.8769},{n:'DUMBO',lat:40.7033,lng:-73.9889}];
+const CPM=[0,0.094,0.135,0.166,0.192,0.215,0.236,0.255,0.273,0.290,0.305,0.320,0.333,0.346,0.358,0.369,0.380,0.390,0.399,0.408,0.416,0.424,0.432,0.439,0.447,0.454,0.461,0.467,0.473,0.480,0.486,0.491,0.497,0.503,0.508,0.573,0.576,0.579,0.582,0.584,0.587,0.590,0.593,0.595,0.598,0.601,0.604,0.607,0.609,0.612,0.615];
+function genOf(id){if(id<=151)return 1;if(id<=251)return 2;if(id<=386)return 3;if(id<=493)return 4;if(id<=649)return 5;if(id<=721)return 6;if(id<=809)return 7;if(id<=905)return 8;return 9;}
+function estimateCP(id,iv,lvl){const l=Math.min(Math.max(lvl||20,1),50);const cpm=CPM[Math.min(l,CPM.length-1)]||0.5;return Math.max(10,Math.round(id*1.5*(cpm*cpm)*(1+(iv>=0?iv:50)/100*0.4)));}
 
-// CP multiplier par level (simplifie) — pour estimer CP quand l'API ne le donne pas
-const CPM = [0,0.094,0.1351374,0.1663979,0.1926509,0.2157325,0.2365727,0.2557201,0.2735304,0.2901239,0.3056,0.3200,0.3337,0.3464,0.3583,0.3696,0.3801,0.3900,0.3993,0.4081,0.4166,0.4246,0.4325,0.4399,0.4472,0.4543,0.4610,0.4675,0.4739,0.4800,0.4860,0.4918,0.4975,0.5030,0.5085,0.5738,0.5765,0.5792,0.5820,0.5848,0.5876,0.5903,0.5931,0.5959,0.5986,0.6014,0.6042,0.6070,0.6098,0.6126,0.6155];
-// Base stats approximatives par species (fallback si on n'a pas les vraies)
-// CP = ((atk+15) * sqrt(def+15) * sqrt(sta+15) * cpm^2) / 10
-function estimateCP(pkId, iv, lvl) {
-  // On utilise l'ID pour avoir une base stats approximative
-  // Valeurs moyennes NYC: lvl 1-40, iv 0-100
-  const l = Math.min(Math.max(lvl||20, 1), 50);
-  const cpm = CPM[Math.min(l, CPM.length-1)] || 0.5;
-  // On ne connait pas les vraies base stats sans table complete
-  // Estimation raisonnable: CP ~ pkId * 0.8 * cpm^2 * (1 + iv/100*0.4)
-  return Math.max(10, Math.round(pkId * 1.5 * (cpm * cpm) * (1 + (iv>=0?iv:50)/100 * 0.4)));
+// ── LANGUAGE ───────────────────────────────────────────────────
+let lang = 'FR';
+function getName(pk){
+  if(lang==='FR' && FR_NAMES[pk.id]) return FR_NAMES[pk.id];
+  return pk.name;
+}
+function toggleLang(){
+  lang = lang==='FR' ? 'EN' : 'FR';
+  document.getElementById('lang-btn').textContent = lang;
+  renderList(); buildPkList(); refreshMarkers();
 }
 
 // ── STATE ──────────────────────────────────────────────────────
 let map, allSpawns=[], filtered=[];
 let watchList=[], notifOK=false, alerted=new Set();
 let qf='all', activeTypes=[], ivMin=0, cpMin=0;
-let apiMode='demo', fetching=false, sinceIns=0, sheetOpen=false;
-let mapReady=false;
+let activeGen=0; // 0=all
+let selectedPkIds=new Set(); // species filter
+let apiMode='demo', fetching=false, sinceIns=0, sheetOpen=false, mapReady=false;
 
 // ── VIEWPORT CULLING ───────────────────────────────────────────
-// Seuls les marqueurs dans la vue courante sont dans le DOM.
-// Max 300 marqueurs simultanement pour rester fluide.
-const visibleMarkers = new Map(); // uid -> L.marker
-// MAX_VIS adaptatif selon le zoom
-// zoom 16+ : quartier     -> 600 marqueurs
-// zoom 14-15 : arrondissement -> 800
-// zoom 12-13 : NYC entier  -> 1200
-// zoom < 12 : region       -> 600 (moins dense mais large)
-function getMaxVis() {
-  const z = map ? map.getZoom() : 13;
-  if(z >= 16) return 600;
-  if(z >= 14) return 800;
-  if(z >= 12) return 1200;
-  return 600;
+const visibleMarkers=new Map();
+function getMaxVis(){const z=map?map.getZoom():13;if(z>=16)return 600;if(z>=14)return 800;if(z>=12)return 1200;return 600;}
+function doCull(){
+  if(!mapReady)return;
+  const b=map.getBounds(),sw=b.getSouthWest(),ne=b.getNorthEast();
+  const lbuf=(ne.lat-sw.lat)*.2,lgbuf=(ne.lng-sw.lng)*.2;
+  const now=Date.now();
+  const cands=filtered.filter(s=>s.expireAt>now&&s.lat>=sw.lat-lbuf&&s.lat<=ne.lat+lbuf&&s.lng>=sw.lng-lgbuf&&s.lng<=ne.lng+lgbuf);
+  cands.sort((a,b)=>{const pa=(a.isHundo?3:0)+(watchList.some(w=>a.pk.name.toLowerCase().includes(w.toLowerCase()))?2:0)+(RARE_IDS.has(a.pk.id)?1:0);const pb=(b.isHundo?3:0)+(watchList.some(w=>b.pk.name.toLowerCase().includes(w.toLowerCase()))?2:0)+(RARE_IDS.has(b.pk.id)?1:0);return pb-pa||b.iv-a.iv;});
+  const toShow=cands.slice(0,getMaxVis());
+  const showSet=new Set(toShow.map(s=>s.uid));
+  for(const [uid,m] of visibleMarkers){if(!showSet.has(uid)){map.removeLayer(m);visibleMarkers.delete(uid);}}
+  for(const s of toShow){if(!visibleMarkers.has(s.uid)){const m=makeMarker(s);m.addTo(map);visibleMarkers.set(s.uid,m);}}
+  const vc=document.getElementById('vis-chip');
+  if(vc)vc.textContent=visibleMarkers.size+' vis / '+filtered.length+' filtres / '+allSpawns.filter(s=>s.expireAt>now).length+' total';
 }
-
-function doCull() {
-  if(!mapReady) return;
-  const b = map.getBounds();
-  const sw = b.getSouthWest(), ne = b.getNorthEast();
-  // Buffer de 20% autour de la vue
-  const latBuf = (ne.lat - sw.lat) * 0.2;
-  const lngBuf = (ne.lng - sw.lng) * 0.2;
-  const minLat = sw.lat - latBuf, maxLat = ne.lat + latBuf;
-  const minLng = sw.lng - lngBuf, maxLng = ne.lng + lngBuf;
-
-  const now = Date.now();
-
-  // Candidats: dans filtered, non expires, dans la vue
-  const candidates = filtered.filter(s =>
-    s.expireAt > now &&
-    s.lat >= minLat && s.lat <= maxLat &&
-    s.lng >= minLng && s.lng <= maxLng
-  );
-
-  // Trier par priorite: hundo > watched > rare > IV desc
-  candidates.sort((a,b) => {
-    const pa = (a.isHundo?3:0) + (watchList.some(w=>a.pk.name.toLowerCase().includes(w.toLowerCase()))?2:0) + (RARE_IDS.has(a.pk.id)?1:0);
-    const pb = (b.isHundo?3:0) + (watchList.some(w=>b.pk.name.toLowerCase().includes(w.toLowerCase()))?2:0) + (RARE_IDS.has(b.pk.id)?1:0);
-    if(pb !== pa) return pb - pa;
-    return b.iv - a.iv;
-  });
-
-  const toShow = candidates.slice(0, getMaxVis());
-  const toShowSet = new Set(toShow.map(s => s.uid));
-
-  // Retirer marqueurs hors vue
-  for(const [uid, m] of visibleMarkers) {
-    if(!toShowSet.has(uid)) {
-      map.removeLayer(m);
-      visibleMarkers.delete(uid);
-    }
-  }
-  // Ajouter nouveaux marqueurs
-  for(const s of toShow) {
-    if(!visibleMarkers.has(s.uid)) {
-      const m = makeMarker(s);
-      m.addTo(map);
-      visibleMarkers.set(s.uid, m);
-    }
-  }
-
-  // Chip indicateur
-  const vc = document.getElementById('vis-chip');
-  if(vc) vc.textContent = visibleMarkers.size + ' visibles / ' + filtered.length + ' filtres / ' + allSpawns.filter(s=>s.expireAt>now).length + ' total';
-}
-
-let cullTimer = null;
-function scheduleCull() {
-  if(cullTimer) clearTimeout(cullTimer);
-  cullTimer = setTimeout(doCull, 80); // debounce 80ms
-}
-
-function makeMarker(s) {
-  const w = watchList.some(x => s.pk.name.toLowerCase().includes(x.toLowerCase()));
-  const cls = s.isHundo ? 'hundo' : w ? 'watched' : RARE_IDS.has(s.pk.id) ? 'rare' : '';
-  const icon = L.divIcon({
-    html: '<div class="poke-pin '+cls+'"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy"></div>',
-    className: '', iconSize:[42,42], iconAnchor:[21,21]
-  });
-  const m = L.marker([s.lat, s.lng], {icon});
-  m.on('click', e => { L.DomEvent.stopPropagation(e); openPopup(s); });
+let cullTimer=null;
+function scheduleCull(){if(cullTimer)clearTimeout(cullTimer);cullTimer=setTimeout(doCull,80);}
+function makeMarker(s){
+  const w=watchList.some(x=>s.pk.name.toLowerCase().includes(x.toLowerCase()));
+  const cls=s.isHundo?'hundo':w?'watched':RARE_IDS.has(s.pk.id)?'rare':'';
+  const icon=L.divIcon({html:'<div class="poke-pin '+cls+'"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy"></div>',className:'',iconSize:[42,42],iconAnchor:[21,21]});
+  const m=L.marker([s.lat,s.lng],{icon});
+  m.on('click',e=>{L.DomEvent.stopPropagation(e);openPopup(s);});
   return m;
 }
-
-function clearAllMarkers() {
-  for(const m of visibleMarkers.values()) map.removeLayer(m);
-  visibleMarkers.clear();
-}
+function clearAllMarkers(){for(const m of visibleMarkers.values())map.removeLayer(m);visibleMarkers.clear();}
+function refreshMarkers(){clearAllMarkers();scheduleCull();}
 
 // ── INIT ───────────────────────────────────────────────────────
-window.onload = function() {
-  initMap();
-  buildTypeGrid();
-  loadWatch();
-  checkNotif();
-  checkIOS();
+window.onload=function(){
+  initMap(); buildTypeGrid(); buildPkList(); loadWatch(); checkNotif(); checkIOS();
   spawnLoop();
-  setInterval(tick, 1000);
-  setInterval(function(){ if(apiMode==='real') fetchReal(false); }, 30000);
+  setInterval(tick,1000);
+  setInterval(function(){if(apiMode==='real')fetchReal(false);},30000);
 };
-
-function initMap() {
-  // PAS de preferCanvas — incompatible avec L.divIcon sur certains navigateurs
-  map = L.map('map', {
-    center:[40.7580,-73.9855], zoom:13,
-    zoomControl:false, attributionControl:false
-  });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {maxZoom:19}).addTo(map);
-  map.on('click', closePopup);
-  map.on('moveend zoomend', scheduleCull);
-  map.whenReady(function() {
-    mapReady = true;
-    scheduleCull();
-  });
+function initMap(){
+  map=L.map('map',{center:[40.7580,-73.9855],zoom:13,zoomControl:false,attributionControl:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
+  map.on('click',closePopup);
+  map.on('moveend zoomend',scheduleCull);
+  map.whenReady(function(){mapReady=true;scheduleCull();});
 }
-
-function buildTypeGrid() {
-  const g = document.getElementById('type-grid');
-  Object.entries(TYPE_COLORS).forEach(([t,c]) => {
-    const b = document.createElement('div');
-    b.className = 'type-btn'; b.textContent = t;
-    b.style.cssText = 'background:'+c+'22;color:'+c+';border-color:'+c+'33';
-    b.dataset.type = t;
-    b.onclick = () => {
-      b.classList.toggle('active');
-      b.style.borderColor = b.classList.contains('active') ? c : c+'33';
-      if(b.classList.contains('active')){ if(!activeTypes.includes(t)) activeTypes.push(t); }
-      else activeTypes = activeTypes.filter(x => x !== t);
-      applyFilters();
-    };
+function buildTypeGrid(){
+  const g=document.getElementById('type-grid');
+  Object.entries(TYPE_COLORS).forEach(([t,c])=>{
+    const b=document.createElement('div');b.className='type-btn';b.textContent=t;
+    b.style.cssText='background:'+c+'22;color:'+c+';border-color:'+c+'33';b.dataset.type=t;
+    b.onclick=()=>{b.classList.toggle('active');b.style.borderColor=b.classList.contains('active')?c:c+'33';if(b.classList.contains('active')){if(!activeTypes.includes(t))activeTypes.push(t);}else activeTypes=activeTypes.filter(x=>x!==t);applyFilters();};
     g.appendChild(b);
   });
 }
+function loadWatch(){try{watchList=JSON.parse(localStorage.getItem('pw')||'[]');}catch(e){watchList=[];}renderWatch();updateBadge();}
 
-function loadWatch() {
-  try { watchList = JSON.parse(localStorage.getItem('pw') || '[]'); } catch(e) { watchList = []; }
-  renderWatch(); updateBadge();
+// ── POKEMON SELECTOR ──────────────────────────────────────────
+let pkListData=[];
+function buildPkList(){
+  // Sort by gen then name
+  pkListData=PKMN.slice().sort((a,b)=>{const ga=genOf(a.id),gb=genOf(b.id);return ga-gb||getName(a).localeCompare(getName(b));});
+  renderPkList('');
+}
+function renderPkList(search){
+  const list=document.getElementById('pk-list');
+  list.innerHTML='';
+  const s=search.toLowerCase();
+  const items=pkListData.filter(pk=>!s||getName(pk).toLowerCase().includes(s)||pk.name.toLowerCase().includes(s));
+  items.slice(0,200).forEach(pk=>{
+    const sel=selectedPkIds.has(pk.id);
+    const div=document.createElement('div');
+    div.className='pk-item'+(sel?' selected':'');
+    div.innerHTML='<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+pk.id+'.png" loading="lazy"><div class="pk-item-name">'+getName(pk)+'<br><span style="font-size:10px;color:var(--muted)">'+pk.name+'</span></div><div class="pk-item-gen">Gen '+genOf(pk.id)+'</div><div class="pk-check">'+(sel?'&#10003;':'')+'</div>';
+    div.onclick=()=>{
+      if(selectedPkIds.has(pk.id))selectedPkIds.delete(pk.id);
+      else selectedPkIds.add(pk.id);
+      renderPkList(document.getElementById('pksearch').value);
+      updateSelBadge();
+      applyFilters();
+    };
+    list.appendChild(div);
+  });
+  if(items.length>200){const d=document.createElement('div');d.style.cssText='text-align:center;padding:10px;color:var(--muted);font-size:12px';d.textContent='Affinage la recherche pour voir plus...';list.appendChild(d);}
+}
+function updateSelBadge(){
+  const b=document.getElementById('sel-badge');
+  if(b){b.style.display=selectedPkIds.size?'flex':'none';b.textContent=selectedPkIds.size;}
+}
+function clearPkSel(){selectedPkIds.clear();renderPkList(document.getElementById('pksearch').value);updateSelBadge();applyFilters();}
+function openPkSelect(){document.getElementById('pksel-modal').classList.add('open');}
+function closePkSelect(){document.getElementById('pksel-modal').classList.remove('open');}
+
+// ── GEN FILTER ────────────────────────────────────────────────
+function setGen(el,g){
+  document.querySelectorAll('#gen-bar .gpill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');activeGen=g;applyFilters();
 }
 
 // ── FETCH ──────────────────────────────────────────────────────
-async function spawnLoop() {
-  clearAllMarkers(); allSpawns=[]; sinceIns=0;
-  setChip('Connexion...');
-  await fetchReal(true);
-}
-
-async function fetchReal(first) {
-  if(fetching) return;
-  fetching = true;
-  const url = 'http://localhost:8080/proxy?mons=' + encodeURIComponent(ALL_IDS) + '&time=' + Date.now() + '&since=' + sinceIns;
-  try {
-    const r = await fetch(url, {signal: AbortSignal.timeout(20000)});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const data = await r.json();
-    if(!data || !data.pokemons) throw new Error('no data');
-    sinceIns = (data.meta && data.meta.inserted) ? data.meta.inserted : sinceIns;
-    apiMode = 'real';
-    const now = Math.floor(Date.now()/1000);
-    const newOnes = [];
-    data.pokemons.forEach(raw => {
-      if(!raw.pokemon_id || !raw.lat || !raw.lng || raw.despawn < now) return;
-      const uid = raw.pokemon_id+'_'+raw.lat+'_'+raw.lng+'_'+raw.despawn;
-      if(allSpawns.find(s => s.uid===uid)) return;
-      const pk = PKMN.find(p=>p.id===raw.pokemon_id) || {id:raw.pokemon_id, name:'#'+raw.pokemon_id, type:'normal'};
-      // IV: -1 si inconnu
-      const iv = (raw.attack>=0 && raw.defence>=0 && raw.stamina>=0)
-        ? Math.round((raw.attack+raw.defence+raw.stamina)/45*100) : -1;
-      // CP: utilise la valeur API si disponible, sinon estime
-      const lvl = raw.level > 0 ? raw.level : 20;
-      const cp = raw.cp > 0 ? raw.cp : estimateCP(raw.pokemon_id, iv, lvl);
-      const s = {
-        uid, pk, iv, cp, lvl,
-        lat:parseFloat(raw.lat), lng:parseFloat(raw.lng),
-        zone:'NYC', expireAt:raw.despawn*1000,
-        isHundo: raw.attack>=0 && raw.attack+raw.defence+raw.stamina===45,
-        cpEstimated: raw.cp <= 0  // flag pour afficher ~ dans le popup
-      };
-      allSpawns.push(s); newOnes.push(s);
+async function spawnLoop(){clearAllMarkers();allSpawns=[];sinceIns=0;setChip('Connexion...');await fetchReal(true);}
+async function fetchReal(first){
+  if(fetching)return;fetching=true;
+  const url='/proxy?mons='+encodeURIComponent(ALL_IDS)+'&time='+Date.now()+'&since='+sinceIns;
+  try{
+    const r=await fetch(url,{signal:AbortSignal.timeout(20000)});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    if(!data||!data.pokemons)throw new Error('no data');
+    sinceIns=(data.meta&&data.meta.inserted)?data.meta.inserted:sinceIns;
+    apiMode='real';
+    const now=Math.floor(Date.now()/1000),newOnes=[];
+    data.pokemons.forEach(raw=>{
+      if(!raw.pokemon_id||!raw.lat||!raw.lng||raw.despawn<now)return;
+      const uid=raw.pokemon_id+'_'+raw.lat+'_'+raw.lng+'_'+raw.despawn;
+      if(allSpawns.find(s=>s.uid===uid))return;
+      const pk=PKMN.find(p=>p.id===raw.pokemon_id)||{id:raw.pokemon_id,name:'#'+raw.pokemon_id,type:'normal'};
+      const iv=(raw.attack>=0&&raw.defence>=0&&raw.stamina>=0)?Math.round((raw.attack+raw.defence+raw.stamina)/45*100):-1;
+      const lvl=raw.level>0?raw.level:20;
+      const cp=raw.cp>0?raw.cp:estimateCP(raw.pokemon_id,iv,lvl);
+      const s={uid,pk,iv,cp,lvl,lat:parseFloat(raw.lat),lng:parseFloat(raw.lng),zone:'NYC',expireAt:raw.despawn*1000,isHundo:raw.attack>=0&&raw.attack+raw.defence+raw.stamina===45,cpEst:raw.cp<=0,gen:genOf(raw.pokemon_id)};
+      allSpawns.push(s);newOnes.push(s);
     });
     setChip('LIVE - '+allSpawns.length+' spawns');
-    document.getElementById('cnt').textContent = allSpawns.length;
-    applyFilters();
-    checkAlerts(newOnes);
-    if(first) toast(newOnes.length+' Pokemon charges', 'NYCPokeMap - zoom pour voir les marqueurs', null, '#69ff47');
-  } catch(e) {
-    console.warn('fetchReal:', e.message);
-    apiMode = 'demo';
-    setChip('DEMO - Lance server.py');
-    if(allSpawns.length===0) { genDemo(); }
+    document.getElementById('cnt').textContent=allSpawns.length;
+    applyFilters();checkAlerts(newOnes);
+    if(first)toast(newOnes.length+' Pokemon charges','NYCPokeMap - zoom pour voir',null,'#69ff47');
+  }catch(e){
+    console.warn('fetchReal:',e.message);apiMode='demo';setChip('DEMO - Lance server.py');
+    if(allSpawns.length===0)genDemo();
   }
-  fetching = false;
+  fetching=false;
 }
-
-function setChip(t) { document.getElementById('mode-chip').textContent = t; }
-
-function genDemo() {
-  for(let i=0;i<600;i++){
-    const z=ZONES[Math.floor(Math.random()*ZONES.length)];
-    const pk=PKMN[Math.floor(Math.random()*PKMN.length)];
-    const iv=rollIV(), lvl=5+Math.floor(Math.random()*35);
-    const cp=estimateCP(pk.id, iv, lvl);
-    const s={uid:Math.random().toString(36).slice(2),pk,iv,cp,lvl,
-      lat:z.lat+(Math.random()-.5)*.06, lng:z.lng+(Math.random()-.5)*.06,
-      zone:z.n, expireAt:Date.now()+(5+Math.floor(Math.random()*25))*60000,
-      isHundo:iv===100, cpEstimated:true};
-    allSpawns.push(s);
-  }
-  document.getElementById('cnt').textContent = allSpawns.length;
-  applyFilters(); checkAlerts(allSpawns);
+function setChip(t){document.getElementById('mode-chip').textContent=t;}
+function genDemo(){
+  for(let i=0;i<600;i++){const z=ZONES[Math.floor(Math.random()*ZONES.length)],pk=PKMN[Math.floor(Math.random()*PKMN.length)],iv=rollIV(),lvl=5+Math.floor(Math.random()*35);const s={uid:Math.random().toString(36).slice(2),pk,iv,cp:estimateCP(pk.id,iv,lvl),lvl,lat:z.lat+(Math.random()-.5)*.06,lng:z.lng+(Math.random()-.5)*.06,zone:z.n,expireAt:Date.now()+(5+Math.floor(Math.random()*25))*60000,isHundo:iv===100,cpEst:true,gen:genOf(pk.id)};allSpawns.push(s);}
+  document.getElementById('cnt').textContent=allSpawns.length;applyFilters();checkAlerts(allSpawns);
 }
-
-function rollIV(){
-  const r=Math.random();
-  if(r<.008)return 100;
-  if(r<.04)return 90+Math.floor(Math.random()*10);
-  if(r<.18)return 80+Math.floor(Math.random()*10);
-  return Math.floor(Math.random()*80);
-}
+function rollIV(){const r=Math.random();if(r<.008)return 100;if(r<.04)return 90+Math.floor(Math.random()*10);if(r<.18)return 80+Math.floor(Math.random()*10);return Math.floor(Math.random()*80);}
 
 // ── POPUP ─────────────────────────────────────────────────────
-function openPopup(s) {
+function openPopup(s){
   const rem=Math.max(0,Math.floor((s.expireAt-Date.now())/60000));
   const ic=s.iv===100?'iv-100':s.iv>=90?'iv-90':s.iv>=80?'iv-80':'iv-low';
   const ivStr=s.iv>=0?s.iv+'%':'?';
-  const cpStr=(s.cpEstimated?'~':'')+s.cp;
+  const cpStr=(s.cpEst?'~':'')+s.cp;
+  const displayName=getName(s.pk);
   document.getElementById('popup-content').innerHTML=
-    '<div class="popup-head">'+
-    '<img class="popup-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png">'+
-    '<div><div class="popup-name">'+s.pk.name+' <span class="iv-tag '+ic+'">'+ivStr+'</span></div>'+
-    '<div class="popup-sub">#'+String(s.pk.id).padStart(3,'0')+' - '+s.zone+'</div></div></div>'+
-    '<div class="popup-grid">'+
-    '<div class="pstat"><div class="pstat-l">CP</div><div class="pstat-v">'+cpStr+'</div></div>'+
-    '<div class="pstat"><div class="pstat-l">LVL</div><div class="pstat-v">'+(s.lvl>0?s.lvl:'-')+'</div></div>'+
-    '<div class="pstat"><div class="pstat-l">Timer</div><div class="pstat-v" style="color:'+(rem<=3?'#ff4081':'#00e5ff')+'">'+rem+'m</div></div>'+
-    '</div>'+
-    '<div class="popup-coords" id="pc-coord">'+
-    '<div class="coords-txt">GPS: '+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+'</div>'+
-    '<div class="copy-btn">Copier</div></div>'+
+    '<div class="popup-head"><img class="popup-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png"><div><div class="popup-name">'+displayName+' <span class="iv-tag '+ic+'">'+ivStr+'</span></div><div class="popup-sub">#'+String(s.pk.id).padStart(3,'0')+' - '+s.pk.name+' - Gen '+s.gen+'</div></div></div>'+
+    '<div class="popup-grid"><div class="pstat"><div class="pstat-l">CP</div><div class="pstat-v">'+cpStr+'</div></div><div class="pstat"><div class="pstat-l">LVL</div><div class="pstat-v">'+(s.lvl>0?s.lvl:'-')+'</div></div><div class="pstat"><div class="pstat-l">Timer</div><div class="pstat-v" style="color:'+(rem<=3?'#ff4081':'#00e5ff')+'">'+rem+'m</div></div></div>'+
+    '<div class="popup-coords" id="pc-coord"><div class="coords-txt">GPS: '+s.lat.toFixed(5)+', '+s.lng.toFixed(5)+'</div><div class="copy-btn">Copier</div></div>'+
     (s.isHundo?'<div style="text-align:center;font-size:12px;color:var(--gold);margin-bottom:8px">&#128175; 100% IV PARFAIT !</div>':'')+
-    (s.cpEstimated?'<div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:8px">~ CP estime (IV inconnus)</div>':'')+
-    '<div class="popup-btns">'+
-    '<a class="pbtn" href="https://maps.apple.com/?q='+s.lat+','+s.lng+'" target="_blank">Maps</a>'+
-    '<a class="pbtn" href="https://maps.google.com/?q='+s.lat+','+s.lng+'" target="_blank">Google</a>'+
-    '<div class="pbtn primary" id="pc-watch">+ Alerter</div></div>';
+    (s.cpEst?'<div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:8px">~ CP estimé (IV inconnus)</div>':'')+
+    '<div class="popup-btns"><a class="pbtn" href="https://maps.apple.com/?q='+s.lat+','+s.lng+'" target="_blank">Maps</a><a class="pbtn" href="https://maps.google.com/?q='+s.lat+','+s.lng+'" target="_blank">Google</a><div class="pbtn primary" id="pc-watch">+ Alerter</div></div>';
   const coord=s.lat.toFixed(6)+','+s.lng.toFixed(6);
   document.getElementById('pc-coord').onclick=function(){copyCoords(coord);};
   document.getElementById('pc-watch').onclick=function(){addToWatch(s.pk.name);};
@@ -1309,15 +2200,17 @@ function openPopup(s) {
   map.setView([s.lat,s.lng],16,{animate:true,duration:.5});
 }
 function closePopup(){document.getElementById('poke-popup').style.display='none';}
-function copyCoords(c){try{navigator.clipboard.writeText(c);}catch(e){}toast('Coordonnees copiees',c,null,'#00e5ff');}
+function copyCoords(c){try{navigator.clipboard.writeText(c);}catch(e){}toast('Coordonnées copiées',c,null,'#00e5ff');}
 
 // ── FILTERS ───────────────────────────────────────────────────
-function applyFilters() {
+function applyFilters(){
   const search=document.getElementById('search-input').value.toLowerCase();
   const now=Date.now();
   filtered=allSpawns.filter(s=>{
     if(s.expireAt<now)return false;
-    if(search&&!s.pk.name.toLowerCase().includes(search))return false;
+    if(activeGen>0&&s.gen!==activeGen)return false;
+    if(selectedPkIds.size>0&&!selectedPkIds.has(s.pk.id))return false;
+    if(search&&!getName(s.pk).toLowerCase().includes(search)&&!s.pk.name.toLowerCase().includes(search))return false;
     if(ivMin>0&&s.iv>=0&&s.iv<ivMin)return false;
     if(cpMin>0&&s.cp<cpMin)return false;
     if(activeTypes.length&&!activeTypes.includes(s.pk.type))return false;
@@ -1329,47 +2222,30 @@ function applyFilters() {
     return true;
   });
   filtered.sort((a,b)=>b.iv-a.iv);
-  scheduleCull();
-  renderList();
+  scheduleCull();renderList();
   document.getElementById('sheet-cnt').textContent=filtered.length;
 }
-
-function setQF(el,key){
-  document.querySelectorAll('#filter-bar .fpill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');qf=key;applyFilters();
-}
+function setQF(el,key){document.querySelectorAll('#filter-bar .fpill').forEach(p=>p.classList.remove('active'));el.classList.add('active');qf=key;applyFilters();}
 function resetFilters(){
-  document.getElementById('iv-slider').value=0;
-  document.getElementById('cp-slider').value=0;
-  document.getElementById('iv-val').textContent='0%';
-  document.getElementById('cp-val').textContent='0';
+  document.getElementById('iv-slider').value=0;document.getElementById('cp-slider').value=0;
+  document.getElementById('iv-val').textContent='0%';document.getElementById('cp-val').textContent='0';
   ivMin=0;cpMin=0;activeTypes=[];
   document.querySelectorAll('.type-btn.active').forEach(b=>{b.classList.remove('active');b.style.borderColor=TYPE_COLORS[b.dataset.type]+'33';});
   applyFilters();
 }
-
 function renderList(){
-  const list=document.getElementById('spawn-list');
-  list.innerHTML='';
+  const list=document.getElementById('spawn-list');list.innerHTML='';
   if(!filtered.length){list.innerHTML='<div class="empty"><div class="empty-icon">&#128269;</div><div class="empty-text">Aucun spawn</div></div>';return;}
   filtered.slice(0,100).forEach(s=>{
     const rem=Math.max(0,Math.floor((s.expireAt-Date.now())/60000));
     const ic=s.iv===100?'iv-100':s.iv>=90?'iv-90':s.iv>=80?'iv-80':'iv-low';
     const ivStr=s.iv>=0?s.iv+'%':'?';
-    const cpStr=(s.cpEstimated?'~':'')+s.cp;
+    const cpStr=(s.cpEst?'~':'')+s.cp;
     const w=watchList.some(x=>s.pk.name.toLowerCase().includes(x.toLowerCase()));
     const el=document.createElement('div');
     el.className='sitem'+(s.iv===100?' hundo':'')+(w?' watched':'');
-    el.innerHTML=
-      '<img class="sitem-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy">'+
-      '<div class="sitem-body">'+
-      '<div class="sitem-name">'+s.pk.name+' <span class="iv-tag '+ic+'">'+ivStr+'</span>'+(w?' &#128276;':'')+(RARE_IDS.has(s.pk.id)?' &#11088;':'')+'</div>'+
-      '<div class="sitem-sub">CP '+cpStr+' - Lv'+(s.lvl>0?s.lvl:'?')+' - '+s.zone+'</div></div>'+
-      '<div class="stimer'+(rem<=3?' urgent':'')+'">'+rem+'m</div>';
-    el.onclick=function(){
-      openPopup(s);collapseSheet();
-      map.setView([s.lat,s.lng],Math.max(map.getZoom(),15),{animate:true});
-    };
+    el.innerHTML='<img class="sitem-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy"><div class="sitem-body"><div class="sitem-name">'+getName(s.pk)+' <span class="iv-tag '+ic+'">'+ivStr+'</span>'+(w?' &#128276;':'')+(RARE_IDS.has(s.pk.id)?' &#11088;':'')+'</div><div class="sitem-sub">CP '+cpStr+' · Lv'+(s.lvl>0?s.lvl:'?')+' · Gen'+s.gen+' · '+s.zone+'</div></div><div class="stimer'+(rem<=3?' urgent':'')+'">'+rem+'m</div>';
+    el.onclick=function(){openPopup(s);collapseSheet();map.setView([s.lat,s.lng],Math.max(map.getZoom(),15),{animate:true});};
     list.appendChild(el);
   });
 }
@@ -1382,61 +2258,97 @@ function collapseSheet(){sheetOpen=false;document.getElementById('bottom-sheet')
 function openWatch(){document.getElementById('watch-modal').classList.add('open');}
 function closeWatch(){document.getElementById('watch-modal').classList.remove('open');}
 function addWatch(){const inp=document.getElementById('watch-input');const n=inp.value.trim();if(!n)return;if(!watchList.map(w=>w.toLowerCase()).includes(n.toLowerCase())){watchList.push(n);saveWatch();askNotif();}inp.value='';}
-function addToWatch(name){if(!watchList.map(w=>w.toLowerCase()).includes(name.toLowerCase())){watchList.push(name);saveWatch();toast('Alerte ajoutee',name,null,'#ff4081');askNotif();}}
+function addToWatch(name){if(!watchList.map(w=>w.toLowerCase()).includes(name.toLowerCase())){watchList.push(name);saveWatch();toast('Alerte ajoutée',getName({id:PKMN.find(p=>p.name===name)?.id||0,name}),null,'#ff4081');askNotif();}}
 function removeWatch(name){watchList=watchList.filter(w=>w!==name);saveWatch();}
-function saveWatch(){try{localStorage.setItem('pw',JSON.stringify(watchList));}catch(e){}renderWatch();updateBadge();applyFilters();}
+function saveWatch(){try{localStorage.setItem('pw',JSON.stringify(watchList));}catch(e){}renderWatch();updateBadge();applyFilters();refreshMarkers();}
 function renderWatch(){
   const list=document.getElementById('watch-list');list.innerHTML='';
-  if(!watchList.length){list.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">Ajoute des Pokemon...</div>';return;}
+  if(!watchList.length){list.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">Ajoute des Pokémon pour recevoir des alertes...</div>';return;}
   watchList.forEach(name=>{
     const pk=PKMN.find(p=>p.name.toLowerCase()===name.toLowerCase());
     const row=document.createElement('div');row.className='watch-row';
     row.innerHTML=(pk?'<img class="watch-row-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+pk.id+'.png">':'<span style="font-size:24px">&#127919;</span>')+
-      '<div class="watch-row-name">'+name+'</div><div class="watch-row-del" id="wd-'+encodeURIComponent(name)+'">&#215;</div>';
+      '<div class="watch-row-name">'+(pk?getName(pk):name)+'<br><span style="font-size:10px;color:var(--muted)">'+name+'</span></div><div class="watch-row-del" id="wd-'+encodeURIComponent(name)+'">&#215;</div>';
     row.querySelector('#wd-'+encodeURIComponent(name)).onclick=function(){removeWatch(name);};
     list.appendChild(row);
   });
 }
 function updateBadge(){const b=document.getElementById('watch-cnt');b.style.display=watchList.length?'flex':'none';b.textContent=watchList.length;}
+
+// ── NOTIFICATIONS GROUPEES ─────────────────────────────────────
+// Pour chaque espece, on group les spawns sur 2 minutes avant de notifier
+const notifBuffer=new Map(); // pkName -> {pks:[], timer}
+const NOTIF_DELAY=2*60*1000; // 2 minutes
+const NOTIF_IMMEDIATE=10; // si >=10, notifie immédiatement
+
 function checkAlerts(spawns){
   if(!spawns)return;
   spawns.forEach(s=>{
     if(alerted.has(s.uid))return;
     if(!watchList.some(w=>s.pk.name.toLowerCase().includes(w.toLowerCase())))return;
     alerted.add(s.uid);
-    const rem=Math.floor((s.expireAt-Date.now())/60000);
-    toast(s.pk.name+' detecte!',(s.iv>=0?s.iv+'% IV - ':'')+s.zone+' - '+rem+'m',s.pk.id,'#ff4081',function(){openPopup(s);map.setView([s.lat,s.lng],16,{animate:true});});
-    sendNotif(s);
+    queueNotif(s);
   });
 }
 
+function queueNotif(s){
+  const key=s.pk.name;
+  if(!notifBuffer.has(key)) notifBuffer.set(key,{spawns:[],timer:null});
+  const g=notifBuffer.get(key);
+  g.spawns.push(s);
+  if(g.timer) clearTimeout(g.timer);
+  if(g.spawns.length>=NOTIF_IMMEDIATE){
+    fireGroupNotif(key);
+  } else {
+    g.timer=setTimeout(()=>fireGroupNotif(key), NOTIF_DELAY);
+  }
+}
+
+function fireGroupNotif(key){
+  const g=notifBuffer.get(key);if(!g||!g.spawns.length)return;
+  const count=g.spawns.length;
+  const s=g.spawns[0];
+  const pkName=getName(s.pk);
+  const title=count>1?count+' '+pkName+' ont spawné':pkName+' a spawné';
+  const detail=count>1
+    ? 'Ces 2 dernières minutes · '+s.zone+' et alentours'
+    : (s.iv>=0?s.iv+'% IV · ':'')+s.zone+' · '+Math.floor((s.expireAt-Date.now())/60000)+'m';
+
+  // Toast groupé
+  const w=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className='toast';t.style.borderColor='#ff4081';
+  t.innerHTML='<img class="toast-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png">'+
+    '<div class="toast-body"><div class="toast-name" style="color:#ff4081">'+title+'</div><div class="toast-detail">'+detail+'</div></div>'+
+    (count>1?'<div class="toast-badge">×'+count+'</div>':'');
+  t.onclick=function(){openPopup(s);map.setView([s.lat,s.lng],16,{animate:true});};
+  w.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>t.remove(),400);},6000);
+
+  // Notification push groupée
+  if(notifOK&&Notification.permission==='granted'){
+    try{new Notification(title,{body:detail,icon:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png',tag:'group-'+key,badge:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png'});}catch(e){}
+  }
+  notifBuffer.delete(key);
+}
+
 // ── NOTIFS ────────────────────────────────────────────────────
-function checkNotif(){if(!('Notification' in window))return;const tr=document.getElementById('ntf-track'),sub=document.getElementById('ntf-sub');if(Notification.permission==='granted'){notifOK=true;tr.classList.add('on');sub.textContent='Activees';}else if(Notification.permission==='denied')sub.textContent='Bloquees';else sub.textContent='Tap pour activer';}
-function toggleNotif(){if(!('Notification' in window))return;if(Notification.permission==='granted'){notifOK=!notifOK;document.getElementById('ntf-track').classList.toggle('on',notifOK);document.getElementById('ntf-sub').textContent=notifOK?'Activees':'Desactivees';}else askNotif();}
+function checkNotif(){if(!('Notification' in window))return;const tr=document.getElementById('ntf-track'),sub=document.getElementById('ntf-sub');if(Notification.permission==='granted'){notifOK=true;tr.classList.add('on');sub.textContent='Activées';}else if(Notification.permission==='denied')sub.textContent='Bloquées';else sub.textContent='Tap pour activer';}
+function toggleNotif(){if(!('Notification' in window))return;if(Notification.permission==='granted'){notifOK=!notifOK;document.getElementById('ntf-track').classList.toggle('on',notifOK);document.getElementById('ntf-sub').textContent=notifOK?'Activées':'Désactivées';}else askNotif();}
 function askNotif(){if(!('Notification' in window)||Notification.permission!=='default')return;Notification.requestPermission().then(p=>{notifOK=p==='granted';checkNotif();});}
-function sendNotif(s){if(!notifOK||Notification.permission!=='granted')return;try{new Notification(s.pk.name+(s.iv>=0?' - '+s.iv+'% IV':''),{body:'CP '+(s.cpEstimated?'~':'')+s.cp+' - '+s.zone,icon:'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png',tag:s.uid});}catch(e){}}
 
 // ── TICKER ────────────────────────────────────────────────────
 function tick(){
   const now=Date.now();let exp=0;
-  allSpawns=allSpawns.filter(s=>{
-    if(s.expireAt<now){if(visibleMarkers.has(s.uid)){map.removeLayer(visibleMarkers.get(s.uid));visibleMarkers.delete(s.uid);}exp++;return false;}
-    return true;
-  });
+  allSpawns=allSpawns.filter(s=>{if(s.expireAt<now){if(visibleMarkers.has(s.uid)){map.removeLayer(visibleMarkers.get(s.uid));visibleMarkers.delete(s.uid);}exp++;return false;}return true;});
   if(apiMode==='demo'&&exp>0){
     const newOnes=[];
-    for(let i=0;i<exp;i++){
-      const z=ZONES[Math.floor(Math.random()*ZONES.length)],pk=PKMN[Math.floor(Math.random()*PKMN.length)];
-      const iv=rollIV(),lvl=5+Math.floor(Math.random()*35);
-      const s={uid:Math.random().toString(36).slice(2),pk,iv,cp:estimateCP(pk.id,iv,lvl),lvl,lat:z.lat+(Math.random()-.5)*.06,lng:z.lng+(Math.random()-.5)*.06,zone:z.n,expireAt:Date.now()+(5+Math.floor(Math.random()*25))*60000,isHundo:iv===100,cpEstimated:true};
-      allSpawns.push(s);newOnes.push(s);
-    }
+    for(let i=0;i<exp;i++){const z=ZONES[Math.floor(Math.random()*ZONES.length)],pk=PKMN[Math.floor(Math.random()*PKMN.length)],iv=rollIV(),lvl=5+Math.floor(Math.random()*35);const s={uid:Math.random().toString(36).slice(2),pk,iv,cp:estimateCP(pk.id,iv,lvl),lvl,lat:z.lat+(Math.random()-.5)*.06,lng:z.lng+(Math.random()-.5)*.06,zone:z.n,expireAt:Date.now()+(5+Math.floor(Math.random()*25))*60000,isHundo:iv===100,cpEst:true,gen:genOf(pk.id)};allSpawns.push(s);newOnes.push(s);}
     checkAlerts(newOnes);
   }
   if(exp>0)applyFilters();
 }
-
-function refresh(){clearAllMarkers();allSpawns=[];filtered=[];alerted.clear();spawnLoop();}
+function refresh(){clearAllMarkers();allSpawns=[];filtered=[];alerted.clear();notifBuffer.clear();spawnLoop();}
 function openSettings(){document.getElementById('settings-modal').classList.add('open');}
 function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
 function centerNYC(){map.setView([40.7580,-73.9855],13,{animate:true});}
