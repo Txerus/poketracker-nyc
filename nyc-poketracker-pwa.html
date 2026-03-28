@@ -2072,8 +2072,41 @@ function clearAllMarkers(){for(const m of visibleMarkers.values())map.removeLaye
 function refreshMarkers(){clearAllMarkers();scheduleCull();}
 
 // ── INIT ───────────────────────────────────────────────────────
+function saveFilters(){
+  try{localStorage.setItem('pf',JSON.stringify({
+    qf,ivMin,cpMin,activeTypes,activeGen,
+    selectedPkIds:Array.from(selectedPkIds),
+    lang,
+    search:document.getElementById('search-input')?document.getElementById('search-input').value:''
+  }));}catch(e){}
+}
+function loadFilters(){
+  try{
+    const d=JSON.parse(localStorage.getItem('pf')||'null');
+    if(!d)return;
+    lang=d.lang||'FR';
+    document.getElementById('lang-btn').textContent=lang;
+    qf=d.qf||'all';
+    ivMin=d.ivMin||0;cpMin=d.cpMin||0;
+    activeTypes=d.activeTypes||[];
+    activeGen=d.activeGen||0;
+    selectedPkIds=new Set(d.selectedPkIds||[]);
+    // Restore UI
+    document.querySelectorAll('#filter-bar .fpill').forEach(p=>p.classList.remove('active'));
+    const qfEl=document.querySelector('#filter-bar .fpill[onclick*="''+qf+''"]');
+    if(qfEl)qfEl.classList.add('active');
+    document.querySelectorAll('#gen-bar .gpill').forEach(p=>p.classList.remove('active'));
+    const genEl=document.querySelector('#gen-bar .gpill[onclick*="'+activeGen+'"]');
+    if(genEl)genEl.classList.add('active');
+    if(ivMin>0){const sl=document.getElementById('iv-slider');if(sl){sl.value=ivMin;document.getElementById('iv-val').textContent=ivMin+'%';}}
+    if(cpMin>0){const sl=document.getElementById('cp-slider');if(sl){sl.value=cpMin;document.getElementById('cp-val').textContent=cpMin;}}
+    activeTypes.forEach(t=>{const btn=document.querySelector('.type-btn[data-type="'+t+'"]');if(btn){btn.classList.add('active');btn.style.borderColor=TYPE_COLORS[t]||'white';}});
+    if(d.search){const si=document.getElementById('search-input');if(si)si.value=d.search;}
+    updateSelBadge();
+  }catch(e){}
+}
 window.onload=function(){
-  initMap(); buildTypeGrid(); buildPkList(); loadWatch(); checkNotif(); checkIOS();
+  initMap(); buildTypeGrid(); buildPkList(); loadWatch(); loadFilters(); checkNotif(); checkIOS();
   spawnLoop();
   setInterval(tick,1000);
   setInterval(function(){if(apiMode==='real')fetchReal(false);},30000);
@@ -2221,9 +2254,10 @@ function applyFilters(){
     if(qf==='expiring'&&(s.expireAt-now)/60000>5)return false;
     return true;
   });
-  filtered.sort((a,b)=>b.iv-a.iv);
+  filtered.sort((a,b)=>a.pk.id-b.pk.id);
   scheduleCull();renderList();
   document.getElementById('sheet-cnt').textContent=filtered.length;
+  saveFilters();
 }
 function setQF(el,key){document.querySelectorAll('#filter-bar .fpill').forEach(p=>p.classList.remove('active'));el.classList.add('active');qf=key;applyFilters();}
 function resetFilters(){
@@ -2244,7 +2278,7 @@ function renderList(){
     const w=watchList.some(x=>s.pk.name.toLowerCase().includes(x.toLowerCase()));
     const el=document.createElement('div');
     el.className='sitem'+(s.iv===100?' hundo':'')+(w?' watched':'');
-    el.innerHTML='<img class="sitem-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy"><div class="sitem-body"><div class="sitem-name">'+getName(s.pk)+' <span class="iv-tag '+ic+'">'+ivStr+'</span>'+(w?' &#128276;':'')+(RARE_IDS.has(s.pk.id)?' &#11088;':'')+'</div><div class="sitem-sub">CP '+cpStr+' · Lv'+(s.lvl>0?s.lvl:'?')+' · Gen'+s.gen+' · '+s.zone+'</div></div><div class="stimer'+(rem<=3?' urgent':'')+'">'+rem+'m</div>';
+    el.innerHTML='<img class="sitem-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy"><div class="sitem-body"><div class="sitem-name"><span style="font-size:10px;color:var(--muted);font-family:Courier New,monospace;margin-right:2px">#'+String(s.pk.id).padStart(3,'0')+'</span>'+getName(s.pk)+' <span class="iv-tag '+ic+'">'+ivStr+'</span>'+(w?' &#128276;':'')+(RARE_IDS.has(s.pk.id)?' &#11088;':'')+'</div><div class="sitem-sub">CP '+cpStr+' · Lv'+(s.lvl>0?s.lvl:'?')+' · Gen'+s.gen+' · '+s.zone+'</div></div><div class="stimer'+(rem<=3?' urgent':'')+'">'+rem+'m</div>';
     el.onclick=function(){openPopup(s);collapseSheet();map.setView([s.lat,s.lng],Math.max(map.getZoom(),15),{animate:true});};
     list.appendChild(el);
   });
