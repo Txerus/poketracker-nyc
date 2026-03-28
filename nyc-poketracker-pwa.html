@@ -2093,10 +2093,10 @@ function loadFilters(){
     selectedPkIds=new Set(d.selectedPkIds||[]);
     // Restore UI
     document.querySelectorAll('#filter-bar .fpill').forEach(p=>p.classList.remove('active'));
-    const qfEl=document.querySelector('#filter-bar .fpill[onclick*="''+qf+''"]');
+    const qfEl=Array.from(document.querySelectorAll('#filter-bar .fpill')).find(p=>p.getAttribute('onclick')&&p.getAttribute('onclick').includes("'"+qf+"'"));
     if(qfEl)qfEl.classList.add('active');
     document.querySelectorAll('#gen-bar .gpill').forEach(p=>p.classList.remove('active'));
-    const genEl=document.querySelector('#gen-bar .gpill[onclick*="'+activeGen+'"]');
+    const genEl=Array.from(document.querySelectorAll('#gen-bar .gpill')).find(p=>p.getAttribute('onclick')&&p.getAttribute('onclick').includes(','+activeGen+')'));
     if(genEl)genEl.classList.add('active');
     if(ivMin>0){const sl=document.getElementById('iv-slider');if(sl){sl.value=ivMin;document.getElementById('iv-val').textContent=ivMin+'%';}}
     if(cpMin>0){const sl=document.getElementById('cp-slider');if(sl){sl.value=cpMin;document.getElementById('cp-val').textContent=cpMin;}}
