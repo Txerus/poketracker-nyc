@@ -2133,7 +2133,7 @@ function loadWatch(){try{watchList=JSON.parse(localStorage.getItem('pw')||'[]');
 let pkListData=[];
 function buildPkList(){
   // Sort by gen then name
-  pkListData=PKMN.slice().sort((a,b)=>{const ga=genOf(a.id),gb=genOf(b.id);return ga-gb||getName(a).localeCompare(getName(b));});
+  pkListData=PKMN.slice().sort((a,b)=>a.id-b.id);
   renderPkList('');
 }
 function renderPkList(search){
@@ -2145,7 +2145,7 @@ function renderPkList(search){
     const sel=selectedPkIds.has(pk.id);
     const div=document.createElement('div');
     div.className='pk-item'+(sel?' selected':'');
-    div.innerHTML='<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+pk.id+'.png" loading="lazy"><div class="pk-item-name">'+getName(pk)+'<br><span style="font-size:10px;color:var(--muted)">'+pk.name+'</span></div><div class="pk-item-gen">Gen '+genOf(pk.id)+'</div><div class="pk-check">'+(sel?'&#10003;':'')+'</div>';
+    div.innerHTML='<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+pk.id+'.png" loading="lazy"><div class="pk-item-name"><span style="font-size:10px;color:var(--muted);font-family:Courier New,monospace">#'+String(pk.id).padStart(3,'0')+'</span> '+getName(pk)+(lang==='FR'&&FR_NAMES[pk.id]?'<br><span style="font-size:10px;color:var(--muted)">'+pk.name+'</span>':'')+'</div><div class="pk-item-gen">Gen '+genOf(pk.id)+'</div><div class="pk-check">'+(sel?'&#10003;':'')+'</div>';
     div.onclick=()=>{
       if(selectedPkIds.has(pk.id))selectedPkIds.delete(pk.id);
       else selectedPkIds.add(pk.id);
@@ -2268,23 +2268,68 @@ function resetFilters(){
   applyFilters();
 }
 function renderList(){
-  const list=document.getElementById('spawn-list');list.innerHTML='';
-  if(!filtered.length){list.innerHTML='<div class="empty"><div class="empty-icon">&#128269;</div><div class="empty-text">Aucun spawn</div></div>';return;}
-  filtered.slice(0,100).forEach(s=>{
+  const list=document.getElementById('spawn-list');
+  list.innerHTML='';
+  if(!filtered.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">&#128269;</div><div class="empty-text">Aucun spawn</div></div>';
+    return;
+  }
+
+  // Deduplicate par espece : garder le meilleur IV de chaque espece
+  // puis trier par numero de Pokedex
+  const now=Date.now();
+  const bySpecies=new Map();
+  filtered.forEach(s=>{
+    if(s.expireAt<=now)return;
+    const existing=bySpecies.get(s.pk.id);
+    if(!existing||s.iv>existing.iv||(s.iv===existing.iv&&s.expireAt>existing.expireAt)){
+      bySpecies.set(s.pk.id,s);
+    }
+  });
+
+  // Trier par numero Pokedex
+  const dedupList=Array.from(bySpecies.values()).sort((a,b)=>a.pk.id-b.pk.id);
+
+  // Afficher tous les spawns de l'espece selectionnee si recherche active
+  const search=document.getElementById('search-input').value.toLowerCase();
+  const displayList = (search || selectedPkIds.size>0) ? filtered.filter(s=>s.expireAt>now).slice(0,150) : dedupList;
+
+  displayList.forEach(s=>{
     const rem=Math.max(0,Math.floor((s.expireAt-Date.now())/60000));
     const ic=s.iv===100?'iv-100':s.iv>=90?'iv-90':s.iv>=80?'iv-80':'iv-low';
     const ivStr=s.iv>=0?s.iv+'%':'?';
     const cpStr=(s.cpEst?'~':'')+s.cp;
     const w=watchList.some(x=>s.pk.name.toLowerCase().includes(x.toLowerCase()));
+    // Compte combien de ce pokemon sont presents
+    const count=filtered.filter(x=>x.pk.id===s.pk.id&&x.expireAt>now).length;
     const el=document.createElement('div');
     el.className='sitem'+(s.iv===100?' hundo':'')+(w?' watched':'');
-    el.innerHTML='<img class="sitem-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy"><div class="sitem-body"><div class="sitem-name"><span style="font-size:10px;color:var(--muted);font-family:Courier New,monospace;margin-right:2px">#'+String(s.pk.id).padStart(3,'0')+'</span>'+getName(s.pk)+' <span class="iv-tag '+ic+'">'+ivStr+'</span>'+(w?' &#128276;':'')+(RARE_IDS.has(s.pk.id)?' &#11088;':'')+'</div><div class="sitem-sub">CP '+cpStr+' · Lv'+(s.lvl>0?s.lvl:'?')+' · Gen'+s.gen+' · '+s.zone+'</div></div><div class="stimer'+(rem<=3?' urgent':'')+'">'+rem+'m</div>';
+    el.innerHTML=
+      '<img class="sitem-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+s.pk.id+'.png" loading="lazy">'+
+      '<div class="sitem-body">'+
+      '<div class="sitem-name">'+
+        '<span style="font-size:10px;color:var(--muted);font-family:Courier New,monospace;margin-right:2px">#'+String(s.pk.id).padStart(3,'0')+'</span>'+
+        getName(s.pk)+' '+
+        '<span class="iv-tag '+ic+'">'+ivStr+'</span>'+
+        (count>1?'<span style="font-size:10px;background:rgba(168,85,247,.2);color:#a855f7;padding:1px 5px;border-radius:8px;margin-left:2px">×'+count+'</span>':'')+
+        (w?' &#128276;':'')+(RARE_IDS.has(s.pk.id)?' &#11088;':'')+
+      '</div>'+
+      '<div class="sitem-sub">CP '+cpStr+' · Lv'+(s.lvl>0?s.lvl:'?')+' · Gen'+s.gen+'</div>'+
+      '</div>'+
+      '<div class="stimer'+(rem<=3?' urgent':'')+'">'+rem+'m</div>';
     el.onclick=function(){openPopup(s);collapseSheet();map.setView([s.lat,s.lng],Math.max(map.getZoom(),15),{animate:true});};
     list.appendChild(el);
   });
+
+  // Indicateur en bas si vue dedupliquee
+  if(!search && selectedPkIds.size===0 && dedupList.length<filtered.length){
+    const info=document.createElement('div');
+    info.style.cssText='text-align:center;padding:10px;color:var(--muted);font-size:11px';
+    info.textContent=dedupList.length+' espèces différentes · '+filtered.length+' spawns total · cherche un nom pour voir tous';
+    list.appendChild(info);
+  }
 }
 
-// ── SHEET ─────────────────────────────────────────────────────
 function toggleSheet(){sheetOpen=!sheetOpen;document.getElementById('bottom-sheet').classList.toggle('expanded',sheetOpen);}
 function collapseSheet(){sheetOpen=false;document.getElementById('bottom-sheet').classList.remove('expanded');}
 
